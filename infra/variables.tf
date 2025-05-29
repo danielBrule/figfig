@@ -3,19 +3,19 @@ variable "location" {
 }
 
 variable "resource_group_name" {
-  default = "my-python-project-rg"
+  default = "FigFigRG"
 }
 
 variable "project_name" {
-  default = "myapp"
+  default = "figscraper"
 }
 
 variable "acr_name" {
-  default = "myacrpython1234"
+  default = "figfigacr"
 }
 
 variable "image_name" {
-  default = "my-python-app"
+  default = "figfig-app"
 }
 
 variable "sql_admin" {
