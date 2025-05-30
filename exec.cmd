@@ -1,3 +1,12 @@
+../terraform plan 
+../terraform apply 
+
 az login 
 
-az acr login --name figfigacr --expose-token --output tsv --query accessToken | docker login figfigacr.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin
+az acr login --name figfigacr 
+
+docker build -t figfigacr.azurecr.io/figfig-app:v1 .
+
+docker push figfigacr.azurecr.io/figfig-app:v1 .    
+
+az acr repository list --name figfigacr --output table
