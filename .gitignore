@@ -1,1 +1,8 @@
 infra/terraform.tfvars
+.env
+db/__pycache__/database.cpython-313.pyc
+db/__pycache__/models.cpython-313.pyc
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/.terraform/providers/registry.terraform.io/hashicorp/azurerm/4.30.0/windows_amd64/terraform-provider-azurerm_v4.30.0_x5.exe
