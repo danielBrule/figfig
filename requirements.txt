@@ -1,3 +1,6 @@
 sqlalchemy>=2.0
 pyodbc
 python-dotenv
+pandas
+urllib3
+requests

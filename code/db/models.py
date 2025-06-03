@@ -1,7 +1,16 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Index
 
 Base = declarative_base()
+
+class SitemapURLs(Base):
+    __tablename__ = "sitemap_urls"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    url = Column(String(200), nullable=False)
+    
+    __table_args__ = (
+        Index('ix_sitemap_urls_url', 'url'),  # Create index on `url`
+    )
 
 class Keywords(Base):
     __tablename__ = "keywords"
@@ -19,7 +28,7 @@ class Articles(Base):
     publication_date = Column(DateTime, nullable=False)
     last_modification_date = Column(DateTime, nullable=False)
     newspaper = Column(String(10), nullable=False)
-    url = Column(String(500), nullable=False)
+    url = Column(String(200), nullable=False)
     has_been_parsed = Column(Integer, nullable=False)
     
 

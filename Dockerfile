@@ -15,15 +15,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY .env .  
 
-COPY db/  ./db/
-COPY db/database.py  ./db/database.py
+COPY code/  ./code/
+COPY code/db/database.py  ./db/database.py
+COPY code/db/models.py  ./db/models.py
 COPY db/init_db.py  ./db/init_db.py
-COPY db/models.py  ./db/models.py
 
 COPY app/ ./app/
 
 
-RUN ls -la ./db
 WORKDIR /code/db/
 
 RUN python /code/db/init_db.py > result.txt
