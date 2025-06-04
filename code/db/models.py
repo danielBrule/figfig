@@ -5,8 +5,9 @@ Base = declarative_base()
 
 class SitemapURLs(Base):
     __tablename__ = "sitemap_urls"
-    id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String(200), nullable=False)
+    last_modification = Column(DateTime, nullable=False)
+    to_process = Column(Boolean, nullable=False)    
     
     __table_args__ = (
         Index('ix_sitemap_urls_url', 'url'),  # Create index on `url`
