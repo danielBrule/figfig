@@ -16,15 +16,25 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY .env .  
 
 COPY code/  ./code/
+COPY code/db  ./code/db
 COPY code/db/database.py  ./db/database.py
 COPY code/db/models.py  ./db/models.py
-COPY db/init_db.py  ./db/init_db.py
 
-COPY app/ ./app/
+COPY code/scrapers ./code/scrapers
+COPY code/scrapers/daily_urls.py ./code/scrapers/daily_urls.py
 
 
-WORKDIR /code/db/
+COPY code/utils  ./code/utils
+COPY code/utils/helpers.py  ./code/utils/helpers.py
+COPY code/utils/log.py  ./code/utils/log.py
 
-RUN python /code/db/init_db.py > result.txt
+COPY code/init_db.py  ./code/init_db.py
+
+
+
+
+RUN ls -lahR /code
+WORKDIR /code/code
+RUN python init_db.py > result.txt
 
 CMD ["python", "app/main.py"]
