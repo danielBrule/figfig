@@ -9,7 +9,8 @@ LOG_FILE_PATH = os.getenv("LOG_FILE_PATH")
 LOG_DATETIME_FORMAT = os.getenv("LOG_DATETIME_FORMAT")
 LOG_FORMAT = os.getenv("LOG_FORMAT")
 
-logging.basicConfig(level=logging.INFO)
+
+# logging.basicConfig(level=logging.INFO)
 
 
 def compute_log_file_path(log_file_path: str, log_datetime_format: str) -> str:
@@ -29,6 +30,7 @@ def create_logger(
     log_format: str | None = None,
     log_file_path: str | None = None,
     log_datetime_format: str | None = None,
+    log_level: int = logging.INFO
 ) -> logging.Logger:
     """
     Create a logger to log to the console and eventually to a file.
@@ -43,9 +45,16 @@ def create_logger(
 
     # Create a custom logger
     logger_ = logging.getLogger(__name__)
+    logger_.setLevel(log_level) 
+    logger_.propagate = False
+    logger_.handlers.clear()
+
+    
 
     # Create handlers
     c_handler = logging.StreamHandler()
+    c_handler.setLevel(log_level)
+    
 
     # Create formatters and add it to handlers
     c_format = logging.Formatter(fmt=log_format)
@@ -70,16 +79,27 @@ def create_logger(
 
         # Create the file handler
         f_handler = logging.FileHandler(log_file_path_ts, mode="a+", encoding="utf-8")
+        f_handler.setLevel(log_level)
         f_format = logging.Formatter(fmt=log_format)
         f_handler.setFormatter(f_format)
         logger_.addHandler(f_handler)
 
     return logger_
 
+logging.basicConfig()
+logging.getLogger('sqlalchemy').setLevel(logging.ERROR)
 
-logger = create_logger(LOG_FORMAT, LOG_FILE_PATH, LOG_DATETIME_FORMAT)
+root_logger = logging.getLogger()
+root_logger.handlers.clear()
+root_logger.propagate = False
+
+logger = create_logger(log_format=LOG_FORMAT, 
+                       log_file_path=LOG_FILE_PATH,
+                       log_datetime_format=LOG_DATETIME_FORMAT,
+                       log_level=logging.INFO)
 
 # Log environment variables
 logger.info("Printing environment variables")
 logger.info(f"LOG_FORMAT: {LOG_FORMAT}")
 logger.info(f"LOG_FILE_PATH: {LOG_FILE_PATH}")
+

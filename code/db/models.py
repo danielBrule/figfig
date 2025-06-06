@@ -1,10 +1,11 @@
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Index
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Index, Float
 
 Base = declarative_base()
 
 class SitemapURLs(Base):
     __tablename__ = "sitemap_urls"
+    id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String(200), nullable=False)
     last_modification = Column(DateTime, nullable=False)
     to_process = Column(Boolean, nullable=False)    
@@ -12,6 +13,21 @@ class SitemapURLs(Base):
     __table_args__ = (
         Index('ix_sitemap_urls_url', 'url'),  # Create index on `url`
     )
+
+    
+
+class ArticlesURLs(Base):
+    __tablename__ = "articles_urls"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    url = Column(String(400), primary_key=True, nullable=False)
+    last_modification = Column(DateTime, nullable=False)
+    to_process = Column(Boolean, nullable=False)    
+    priority = Column(Float, nullable=False)
+    source_id = Column(Integer, ForeignKey("sitemap_urls.id"), nullable=False)
+    __table_args__ = (
+        Index('ix_articles_urls_url', 'url'),  # Create index on `url`
+    )
+    
 
 class Keywords(Base):
     __tablename__ = "keywords"
@@ -24,7 +40,7 @@ class Contributors(Base):
 
 class Articles(Base):
     __tablename__ = "articles"
-    id = Column(String(19), primary_key=True)
+    id = Column(String(19), foreign_keys=ForeignKey("articles_urls.id"), primary_key=True)
     title = Column(String(500), nullable=False)
     publication_date = Column(DateTime, nullable=False)
     last_modification_date = Column(DateTime, nullable=False)
