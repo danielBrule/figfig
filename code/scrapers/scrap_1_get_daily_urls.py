@@ -2,7 +2,6 @@ from utils.log import logger
 
 import requests
 import xml.etree.ElementTree as ET
-from enum import Enum
 import datetime 
 import dateutil
 from sqlalchemy import select
@@ -11,19 +10,13 @@ from sqlalchemy.orm import Session
 
 from db.database import engine
 from db.models import SitemapURLs
-
-
-class Newspaper(Enum):
-    Lefigaro = 1
+from utils.constants import NewspaperEnum, NAMESPACE
     
 
 URL_ARTICLES = "https://sitemaps.lefigaro.fr/lefigaro.fr/articles.xml"
-NAMESPACE = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
-
-LIST_COLUMNS_URLS = ["url"]
 
 class DailyURLs:
-    def __init__(self, newspaper: Newspaper):
+    def __init__(self, newspaper: NewspaperEnum):
         logger.info("DailyURLs.__init__")
         self._newspaper = newspaper
         self._d_urls_sitemap = {}    
@@ -59,9 +52,15 @@ class DailyURLs:
             
         for url, updated_date in self._d_urls_sitemap.items(): 
             if url not in dict_existing_urls:
-                self._l_urls_sitemap_new.append(SitemapURLs(url= url, last_modification=updated_date, to_process=True))
+                self._l_urls_sitemap_new.append(SitemapURLs(url= url, 
+                                                            last_modification=updated_date, 
+                                                            to_process=True,
+                                                            newspaper_id=self._newspaper.value))
             elif dict_existing_urls[url].replace(tzinfo=tzoffset(None, 7200)) != updated_date.replace(tzinfo=tzoffset(None, 7200)):
-                self._l_urls_sitemap_updated.append(SitemapURLs(url= url, last_modification=updated_date, to_process=True))
+                self._l_urls_sitemap_updated.append(SitemapURLs(url= url, 
+                                                                last_modification=updated_date, 
+                                                                to_process=True,
+                                                                newspaper_id=self._newspaper.value))
         
     def _add_new_urls(self):
         logger.info("DailyURLs._add_new_urls")
@@ -88,5 +87,5 @@ class DailyURLs:
 
 
 if __name__ == "__main__":
-    parser = DailyURLs(newspaper=Newspaper.Lefigaro)
+    parser = DailyURLs(newspaper=NewspaperEnum.Lefigaro)
     parser.entry_point()

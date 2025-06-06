@@ -1,0 +1,45 @@
+import xml.etree.ElementTree as ET
+from bs4 import BeautifulSoup
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from db.database import engine
+from db.models import ArticlesURLs, Articles
+from utils.log import logger
+from utils.constants import Newspaper, NAMESPACE
+
+from utils.helpers import simple_get
+
+
+class ArticlesInfo:
+    def __init__(self, newspaper: Newspaper, articles_id: int):
+        logger.info("ArticlesInfo.__init__")
+        self._newspaper = newspaper
+        self._articles_id = articles_id
+        self._url_articles
+
+    def _get_article_url(self):
+        stmt = select(ArticlesURLs.url).where(ArticlesURLs.id == self._sitemap_urls_id)
+        with Session(engine) as session:
+            self._url_articles = session.execute(stmt).scalar_one_or_none()
+    
+    def get_articles_info(url: str) -> dict:
+        raw_html = simple_get(url)
+        html = BeautifulSoup(raw_html, 'html.parser')
+        title = html.find(name="title").text.strip()
+        publication_date = html.find(name="meta", attrs={"property": "article:published_time"}).attrs["content"].split(",")
+        
+        keywords = html.find(name="meta", attrs={"property": "article:tag"}).attrs["content"].split(",")
+        description = html.find(name="meta", attrs={"name": "description"}).attrs["content"].strip()
+        
+        uid = html.find(name="div", attrs={"class": "fig-content-body"}).attrs["data-id"]
+
+    def entry_point(self):
+        logger.info("ArticlesInfo.entry_point")
+        self._get_article_url()
+
+
+
+if __name__ == "__main__":
+    parser = ArticlesInfo(newspaper=Newspaper.Lefigaro, articles_id=12)
+    parser.entry_point()
