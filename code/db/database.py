@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 import os 
@@ -24,5 +24,5 @@ print(f"{connection_string}")
 
 
 # Create engine
-engine = create_engine(connection_string, echo=True)
+engine = create_engine(connection_string)
 session = Session(engine)

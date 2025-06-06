@@ -16,13 +16,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY .env .  
 
 COPY code/  ./code/
+
 COPY code/db  ./code/db
-COPY code/db/database.py  ./db/database.py
 COPY code/db/models.py  ./db/models.py
+COPY code/db/database.py  ./db/database.py
 
-COPY code/scrapers ./code/scrapers
-COPY code/scrapers/daily_urls.py ./code/scrapers/daily_urls.py
-
+COPY code/scrapers  ./code/scrapers
+COPY code/scrapers/scrap_1_daily_urls.py  ./code/scrapers/scrap_1_daily_urls.py
+COPY code/scrapers/scrap_2_new_articles_url.py  ./code/scrapers/scrap_2_new_articles_url.py
 
 COPY code/utils  ./code/utils
 COPY code/utils/helpers.py  ./code/utils/helpers.py
@@ -33,7 +34,6 @@ COPY code/init_db.py  ./code/init_db.py
 
 
 
-RUN ls -lahR /code
 WORKDIR /code/code
 RUN python init_db.py > result.txt
 
