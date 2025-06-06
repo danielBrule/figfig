@@ -1,4 +1,3 @@
-from utils.log import logger
 
 import requests
 import xml.etree.ElementTree as ET
@@ -11,6 +10,7 @@ from sqlalchemy.orm import Session
 from db.database import engine
 from db.models import SitemapURLs
 from utils.constants import NewspaperEnum, NAMESPACE
+from utils.log import logger
     
 
 URL_ARTICLES = "https://sitemaps.lefigaro.fr/lefigaro.fr/articles.xml"
@@ -68,7 +68,7 @@ class DailyURLs:
             session.add_all(self._l_urls_sitemap_new)
             session.commit()
 
-        logger.info(f"{len(self._l_urls_sitemap_new)} new URLs inserted into the database.")
+        logger.info(f"\t{len(self._l_urls_sitemap_new)} new URLs inserted into the database.")
         
     def _update_urls(self):
         logger.info("DailyURLs._update_urls")

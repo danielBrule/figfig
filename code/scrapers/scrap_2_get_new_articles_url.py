@@ -8,13 +8,12 @@ from sqlalchemy.orm import Session
 from db.database import engine
 from db.models import ArticlesURLs, SitemapURLs
 from utils.log import logger
-from utils.constants import NewspaperEnum, NAMESPACE
+from utils.constants import ArticleStageEnum, NAMESPACE
 
 
 class ArticlesURLsNew:
-    def __init__(self, newspaper: NewspaperEnum, sitemap_urls_id: int):
+    def __init__(self, sitemap_urls_id: int):
         logger.info("ArticlesURLsNew.__init__")
-        self._newspaper = newspaper
         self._sitemap_urls_id = sitemap_urls_id
         self._orl_articles = []
         self._l_all_articles_urls = []
@@ -39,9 +38,9 @@ class ArticlesURLsNew:
             priority = sitemap.find("ns:priority", NAMESPACE).text
             self._orl_articles.append(ArticlesURLs(url=loc,
                                                    last_modification=lastmod,
-                                                   to_process=True,
+                                                   stage=ArticleStageEnum.UrlGathered.value,
                                                    priority=priority,
-                                                   source_id=self._sitemap_urls_id,))
+                                                   source_id=self._sitemap_urls_id))
             self._l_all_articles_urls.append(loc)
         logger.info(f"\t{len(self._orl_articles)} articles' urls gathered")
 
@@ -86,14 +85,14 @@ class ArticlesURLsNew:
     def entry_point(self):
         logger.info("ArticlesURLsNew.entry_point")
         self._get_sitemap_url()
+        self._get_articles_url()
         self._remove_urls_already_in_db()
         if len(self._l_new_articles_urls) > 0:
-            self._get_articles_url()
             self._add_new_urls()
             self._update_sitemap_url()
         else: 
             logger.warning(f"ArticlesURLsNew._update_sitemap_url '{self._url_articles_xml}' has no new articles")
 
 if __name__ == "__main__":
-    parser = ArticlesURLsNew(newspaper=NewspaperEnum.Lefigaro, sitemap_urls_id=12)
+    parser = ArticlesURLsNew(sitemap_urls_id=12)
     parser.entry_point()

@@ -35,7 +35,6 @@ class ArticlesURLs(Base):
     last_modification = Column(DateTime, nullable=False)
     priority = Column(Float, nullable=False)
     source_id = Column(Integer, ForeignKey("sitemap_urls.id"), nullable=False)
-    newspaper_id = Column(Integer, ForeignKey("newspaper.id"), nullable=False)
     stage = Column(Integer, ForeignKey("article_stage.id"), nullable=False)    
     __table_args__ = (
         Index('ix_articles_urls_url', 'url'),  # Create index on `url`
@@ -50,7 +49,6 @@ class Keywords(Base):
         Index('keywords_full_keyword', 'full_keyword'),  
     )
     
-
 class Contributors(Base):
     __tablename__ = "contributors"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -63,12 +61,11 @@ class Contributors(Base):
 class Articles(Base):
     __tablename__ = "articles"
     id = Column(Integer, ForeignKey("articles_urls.id"), primary_key=True)
-    newspaper_uid = Column(Integer, ForeignKey("articles_urls.id"), nullable=False)
+    uid = Column(String(200), nullable=False)
     title = Column(String(500), nullable=False)
     publication_date = Column(DateTime, nullable=False)
     last_modification_date = Column(DateTime, nullable=False)
-    url = Column(String(200), nullable=False)
-    has_been_parsed = Column(Integer, nullable=False)
+    description = Column(String(1000), nullable=False)
     
 
 class ArticleKeywords(Base):
