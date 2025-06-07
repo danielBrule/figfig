@@ -49,14 +49,7 @@ class Keywords(Base):
         Index('keywords_full_keyword', 'full_keyword'),  
     )
     
-class Contributors(Base):
-    __tablename__ = "contributors"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    Contributor_name = Column(String(150), nullable=False)
-    newspaper = Column(Integer, nullable=False)
-    __table_args__ = (
-        Index('contributors_Contributor_name', 'Contributor_name'),  
-    )
+
     
 class Articles(Base):
     __tablename__ = "articles"
@@ -76,15 +69,20 @@ class ArticleKeywords(Base):
 
 class Comments(Base):
     __tablename__ = "comments"
-    id = Column(Integer, primary_key=True)
+    id = Column(String(100), primary_key=True)
     comment = Column(String(2000), nullable=False)
-    comment_Date = Column(DateTime, nullable=False)
-    is_journaliste = Column(Boolean, nullable=False)
-    has_child = Column(Boolean, nullable=False)
+    comment_date = Column(DateTime, nullable=False)
+    replies_count = Column(Integer, nullable=False)
     sentiment = Column(Integer, nullable=True)
-    contributors_id = Column(Integer, ForeignKey("contributors.id"), nullable=False)
+    contributor_id = Column(String(200), nullable=False)
+    author_type = Column(String(200), nullable=False)
+    parent_id = Column(String(100), ForeignKey("comments.id"), nullable=True, default=None)
     article_id = Column(Integer, ForeignKey("articles.id"), nullable=False)
-    parent_comment_id = Column(Integer, ForeignKey("comments.id"), nullable=True, default=None)
-
-
+    
+    __table_args__ = (
+        Index('comments_contributor_id', 'contributor_id'),  
+    )
+    __table_args__ = (
+        Index('comments_article_id', 'article_id'),  
+    )
 
