@@ -15,9 +15,9 @@ from utils.log import logger
 
 URL_ARTICLES = "https://sitemaps.lefigaro.fr/lefigaro.fr/articles.xml"
 
-class DailyURLs:
+class DailyURLsScraper:
     def __init__(self, newspaper: NewspaperEnum):
-        logger.info("DailyURLs.__init__")
+        logger.info("DailyURLsScraper.__init__")
         self._newspaper = newspaper
         self._d_urls_sitemap = {}    
         self._l_urls_sitemap_new = []
@@ -26,7 +26,7 @@ class DailyURLs:
 
 
     def _get_daily_urls(self):
-        logger.info("DailyURLs._get_daily_urls")
+        logger.info("DailyURLsScraper._get_daily_urls")
         site_map_actu_xml = requests.get(URL_ARTICLES)
         root = ET.fromstring(site_map_actu_xml.text)
         for sitemap in root.findall('ns:sitemap', NAMESPACE):
@@ -39,7 +39,7 @@ class DailyURLs:
         logger.info(f"\t{len(self._d_urls_sitemap)} urls gathered")
 
     def _get_daily_urls_to_process(self):
-        logger.info("DailyURLs._remove_existing_sitemap")
+        logger.info("DailyURLsScraper._remove_existing_sitemap")
         stmt = select(SitemapURLs)
         with Session(engine) as session:
             existing_urls = session.scalars(stmt).all()
@@ -63,7 +63,7 @@ class DailyURLs:
                                                                 newspaper_id=self._newspaper.value))
         
     def _add_new_urls(self):
-        logger.info("DailyURLs._add_new_urls")
+        logger.info("DailyURLsScraper._add_new_urls")
         with Session(engine) as session:
             session.add_all(self._l_urls_sitemap_new)
             session.commit()
@@ -71,7 +71,7 @@ class DailyURLs:
         logger.info(f"\t{len(self._l_urls_sitemap_new)} new URLs inserted into the database.")
         
     def _update_urls(self):
-        logger.info("DailyURLs._update_urls")
+        logger.info("DailyURLsScraper._update_urls")
         with Session(engine) as session:
             session.bulk_update_mappings(SitemapURLs, self._l_urls_sitemap_updated)
             session.commit()
@@ -79,7 +79,7 @@ class DailyURLs:
         logger.info(f"{len(self._l_urls_sitemap_updated)} new URLs updated into the database.")
         
     def entry_point(self): 
-        logger.info("DailyURLs.entry_point")
+        logger.info("DailyURLsScraper.entry_point")
         self._get_daily_urls()
         self._get_daily_urls_to_process()
         self._add_new_urls()
@@ -87,5 +87,5 @@ class DailyURLs:
 
 
 if __name__ == "__main__":
-    parser = DailyURLs(newspaper=NewspaperEnum.Lefigaro)
+    parser = DailyURLsScraper(newspaper=NewspaperEnum.Lefigaro)
     parser.entry_point()
