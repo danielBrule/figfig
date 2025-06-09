@@ -11,9 +11,9 @@ from utils.log import logger
 from utils.constants import ArticleStageEnum, NAMESPACE
 
 
-class ArticlesURLsNew:
+class ArticlesPrimaryInfoScraper:
     def __init__(self, sitemap_urls_id: int):
-        logger.info("ArticlesURLsNew.__init__")
+        logger.info("class ArticlesPrimaryInfoScraper.__init__")
         self._sitemap_urls_id = sitemap_urls_id
         self._orl_articles = []
         self._l_all_articles_urls = []
@@ -22,13 +22,13 @@ class ArticlesURLsNew:
         self._url_articles_xml = None
 
     def _get_sitemap_url(self):
-        logger.info("ArticlesURLsNew._get_sitemap_url")
+        logger.info("ArticlesPrimaryInfoScraper._get_sitemap_url")
         stmt = select(SitemapURLs.url).where(SitemapURLs.id == self._sitemap_urls_id)
         with Session(engine) as session:
             self._url_articles_xml = session.execute(stmt).scalar_one_or_none()
 
     def _get_articles_url(self):
-        logger.info("ArticlesURLsNew._get_articles_url")
+        logger.info("ArticlesPrimaryInfoScraper._get_articles_url")
         articles_xml = requests.get(self._url_articles_xml)
         root = ET.fromstring(articles_xml.text)
         for sitemap in root.findall("ns:url", NAMESPACE):
@@ -45,7 +45,7 @@ class ArticlesURLsNew:
         logger.info(f"\t{len(self._orl_articles)} articles' urls gathered")
 
     def _remove_urls_already_in_db(self):
-        logger.info("ArticlesURLsNew._remove_existing_sitemap")
+        logger.info("ArticlesPrimaryInfoScraper._remove_existing_sitemap")
         stmt = select(ArticlesURLs.url).where(ArticlesURLs.url.in_(self._l_all_articles_urls))
 
         with Session(engine) as session:
@@ -58,7 +58,7 @@ class ArticlesURLsNew:
                               if article.url in self._l_new_articles_urls]
 
     def _add_new_urls(self):
-        logger.info("ArticlesURLsNew._add_new_urls")
+        logger.info("ArticlesPrimaryInfoScraper._add_new_urls")
         with Session(engine) as session:
             session.add_all(self._orl_articles)
             session.commit()
@@ -66,7 +66,7 @@ class ArticlesURLsNew:
         logger.info(f"{len(self._orl_articles)} new articles' URLs inserted into the database.")
 
     def _update_sitemap_url(self):
-        logger.info("ArticlesURLsNew._update_sitemap_url")
+        logger.info("ArticlesPrimaryInfoScraper._update_sitemap_url")
         try:
             with Session(engine) as session:
                 obj = (session.query(SitemapURLs)
@@ -83,7 +83,7 @@ class ArticlesURLsNew:
             raise ex 
 
     def entry_point(self):
-        logger.info("ArticlesURLsNew.entry_point")
+        logger.info("ArticlesPrimaryInfoScraper.entry_point")
         self._get_sitemap_url()
         self._get_articles_url()
         self._remove_urls_already_in_db()
@@ -91,8 +91,8 @@ class ArticlesURLsNew:
             self._add_new_urls()
             self._update_sitemap_url()
         else: 
-            logger.warning(f"ArticlesURLsNew._update_sitemap_url '{self._url_articles_xml}' has no new articles")
+            logger.warning(f"ArticlesPrimaryInfoScraper._update_sitemap_url '{self._url_articles_xml}' has no new articles")
 
 if __name__ == "__main__":
-    parser = ArticlesURLsNew(sitemap_urls_id=12)
+    parser = ArticlesPrimaryInfoScraper(sitemap_urls_id=12)
     parser.entry_point()

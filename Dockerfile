@@ -17,19 +17,20 @@ COPY .env .
 
 COPY code/  ./code/
 
-COPY code/db  ./code/db
-COPY code/db/models.py  ./db/models.py
-COPY code/db/database.py  ./db/database.py
+COPY code/db             ./code/db
+COPY code/db/models.py   ./db/models.py
+COPY code/db/database.py ./db/database.py
 
 COPY code/scrapers  ./code/scrapers
-COPY code/scrapers/scrap_1_get_daily_urls.py  ./code/scrapers/scrap_1_get_daily_urls.py
-COPY code/scrapers/scrap_2_get_new_articles_url.py  ./code/scrapers/scrap_2_get_new_articles_url.py
-COPY code/scrapers/scrap_3_get_articles_info.py  ./code/scrapers/scrap_3_get_articles_info.py
+COPY code/scrapers/scrap_1_get_daily_urls.py               ./code/scrapers/scrap_1_get_daily_urls.py
+COPY code/scrapers/scrap_2_get_articles_primary_info.py    ./code/scrapers/scrap_2_get_articles_primary_info.py
+COPY code/scrapers/scrap_3_get_articles_secondary_info.py  ./code/scrapers/scrap_3_get_articles_secondary_info.py
+COPY code/scrapers/scrap_4_get_comments.py                 ./code/scrapers/scrap_4_get_comments.py
 
 
-COPY code/utils  ./code/utils
-COPY code/utils/helpers.py  ./code/utils/helpers.py
-COPY code/utils/log.py  ./code/utils/log.py
+COPY code/utils               ./code/utils
+COPY code/utils/helpers.py    ./code/utils/helpers.py
+COPY code/utils/log.py        ./code/utils/log.py
 COPY code/utils/constants.py  ./code/utils/constants.py
 
 COPY code/init_db.py  ./code/init_db.py
