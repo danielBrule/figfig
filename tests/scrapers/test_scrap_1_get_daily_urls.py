@@ -24,7 +24,7 @@ SAMPLE_XML = """
 def scraper():
     return DailyURLsScraper(newspaper=NewspaperEnum.Lefigaro)
 
-@patch("yourmodule.requests.get")
+@patch("src.scrapers.scrap_1_get_daily_urls.requests.get")
 def test_get_daily_urls(mock_get, scraper):
     mock_get.return_value.text = SAMPLE_XML
     
