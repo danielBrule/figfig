@@ -39,6 +39,10 @@ COPY code/init_db.py  ./code/init_db.py
 
 
 WORKDIR /code/code
-RUN python init_db.py > result.txt
 
-CMD ["python", "app/main.py"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# RUN python init_db.py > result.txt
+# CMD ["python", "app/main.py"]

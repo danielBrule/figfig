@@ -4,6 +4,8 @@ from contextlib import closing
 import time
 import urllib3
 
+from utils.log import logger
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -35,7 +37,7 @@ def simple_get(url: str,
                 return None
 
     except RequestException as e:
-        print('Error during requests to {0} : {1}'.format(url, str(e)))
+        logger.error('Error during requests to {0} : {1}'.format(url, str(e)))
         return None
 
 def get_url_redirection(url: str,
@@ -51,7 +53,7 @@ def get_url_redirection(url: str,
             else:
                 return None
     except RequestException as e:
-        print('Error during requests to {0} : {1}'.format(url, str(e)))
+        logger.error('Error during requests to {0} : {1}'.format(url, str(e)))
         return None
 
 def simple_requests_json(url: str, user_agent: {}, json: {} = {}, data: {} = {},
@@ -66,5 +68,5 @@ def simple_requests_json(url: str, user_agent: {}, json: {} = {}, data: {} = {},
             else:
                 return None
     except RequestException as e:
-        print('Error during requests to {0} : {1}'.format(url, str(e)))
+        logger.error('Error during requests to {0} : {1}'.format(url, str(e)))
         return None

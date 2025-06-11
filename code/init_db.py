@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+
+
 from sqlalchemy.orm import Session
 
 from db.database import engine
@@ -34,6 +39,7 @@ def init_tables():
 
 # Create all tables defined in Base metadata
 if __name__ == "__main__":
+    
     logger.info("initialise data base")
     create_tables()
     init_tables()

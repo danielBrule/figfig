@@ -3,7 +3,7 @@ variable "location" {
 }
 
 variable "resource_group_name" {
-  default = "FigFigRG"
+  default = "FigFigRGNew"
 }
 
 variable "project_name" {
@@ -26,3 +26,20 @@ variable "sql_password" {
   description = "SQL admin password"
   sensitive   = true
 }
+
+variable "keyvault_name" {
+  default = "figfig-key-vault"
+}
+
+variable "client_id" {
+  sensitive   = true
+}
+
+variable "tenant_id" {
+  sensitive   = true
+}
+
+variable "client_secret" {
+  sensitive   = true
+}
+

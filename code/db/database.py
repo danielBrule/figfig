@@ -1,16 +1,26 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from dotenv import load_dotenv
+
 import os 
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 from utils.log import logger
 
-load_dotenv()
 
+
+KEY_VAULT_NAME = os.getenv("KEY_VAULT_NAME")
+KV_URI = f"https://{KEY_VAULT_NAME}.vault.azure.net"
+credential = DefaultAzureCredential()
+client = SecretClient(vault_url=KV_URI, credential=credential)
+
+
+
+logger.info(f"KEY_VAULT_NAME: {KEY_VAULT_NAME}")
 
 SERVER = os.getenv("DB_SERVER")
 DATABASE = os.getenv("DB_NAME")
 USERNAME = os.getenv("DB_USER")
-PASSWORD = os.getenv("DB_PASSWORD")
+PASSWORD = client.get_secret("db-password").value
 
 # Or whatever version you installed
 DRIVER = os.getenv("DB_DRIVER")
