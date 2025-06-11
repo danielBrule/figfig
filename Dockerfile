@@ -15,30 +15,34 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY .env .  
 
-COPY code/  ./code/
+COPY src/  ./src/
 
-COPY code/db             ./code/db
-COPY code/db/models.py   ./db/models.py
-COPY code/db/database.py ./db/database.py
+COPY src/db             ./src/db
+COPY src/db/models.py   ./db/models.py
+COPY src/db/database.py ./db/database.py
 
-COPY code/scrapers  ./code/scrapers
-COPY code/scrapers/scrap_1_get_daily_urls.py               ./code/scrapers/scrap_1_get_daily_urls.py
-COPY code/scrapers/scrap_2_get_articles_primary_info.py    ./code/scrapers/scrap_2_get_articles_primary_info.py
-COPY code/scrapers/scrap_3_get_articles_secondary_info.py  ./code/scrapers/scrap_3_get_articles_secondary_info.py
-COPY code/scrapers/scrap_4_get_comments.py                 ./code/scrapers/scrap_4_get_comments.py
-
-
-COPY code/utils               ./code/utils
-COPY code/utils/helpers.py    ./code/utils/helpers.py
-COPY code/utils/log.py        ./code/utils/log.py
-COPY code/utils/constants.py  ./code/utils/constants.py
-
-COPY code/init_db.py  ./code/init_db.py
+COPY src/scrapers  ./src/scrapers
+COPY src/scrapers/scrap_1_get_daily_urls.py               ./src/scrapers/scrap_1_get_daily_urls.py
+COPY src/scrapers/scrap_2_get_articles_primary_info.py    ./src/scrapers/scrap_2_get_articles_primary_info.py
+COPY src/scrapers/scrap_3_get_articles_secondary_info.py  ./src/scrapers/scrap_3_get_articles_secondary_info.py
+COPY src/scrapers/scrap_4_get_comments.py                 ./src/scrapers/scrap_4_get_comments.py
 
 
+COPY src/utils               ./src/utils
+COPY src/utils/helpers.py    ./src/utils/helpers.py
+COPY src/utils/log.py        ./src/utils/log.py
+COPY src/utils/constants.py  ./src/utils/constants.py
+
+COPY src/init_db.py  ./src/init_db.py
 
 
-WORKDIR /code/code
-RUN python init_db.py > result.txt
 
-CMD ["python", "app/main.py"]
+
+WORKDIR /code/src
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# RUN python init_db.py > result.txt
+# CMD ["python", "app/main.py"]
