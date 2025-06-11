@@ -1,3 +1,9 @@
 {
-  "python.envFile": "${workspaceFolder}/.env"
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src"
+  ],
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "${workspaceFolder}/src"
+  }
 }

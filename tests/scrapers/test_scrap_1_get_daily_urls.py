@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock
 import datetime
-from code.scrapers.scrap_1_get_daily_urls import DailyURLsScraper  # Adjust import path
-from code.utils.constants import  NewspaperEnum  # Adjust import path
-from code.db.models import SitemapURLs
+from scrapers.scrap_1_get_daily_urls import DailyURLsScraper
+from utils.constants import  NewspaperEnum  
+from db.models import SitemapURLs
 
 
 # Sample XML response for _get_daily_urls
-SAMPLE_XML = """
+SAMPLE_XML = """    
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
     <loc>http://example.com/sitemap1.xml</loc>

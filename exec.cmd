@@ -26,3 +26,8 @@ docker run --env-file .env figfigacr.azurecr.io/figfig-app:v1
 
 REM create service principal, one off not to be reused 
 REM az ad sp create-for-rbac --name figscraper --role Contributor --scopes /subscriptions/051a6d90-968b-4010-896c-8bdb26a892d0
+
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+./venv\Scripts\activate
+REM pip install -r requirements.txt
