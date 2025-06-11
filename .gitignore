@@ -15,12 +15,14 @@ htmlcov/
 .cache/
 .pytest_cache/
 
+
+.terraform/
+
 infra/terraform.tfvars
 src/terraform.tfstate
 
 infra/.terraform.lock.hcl
 infra/terraform.tfstate
 infra/terraform.tfstate.backup
-infra/.terraform/providers/registry.terraform.io/hashicorp/azurerm/4.30.0/windows_amd64/terraform-provider-azurerm_v4.30.0_x5.exe
 
 .env
