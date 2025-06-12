@@ -33,18 +33,18 @@ jobs:
 
       - name: Log in to ACR
         run: |
-          az acr login --name <your-acr-name>
+          az acr login --name figfigacr
 
       - name: Build Docker Image
         run: |
-          docker build -t <your-acr-name>.azurecr.io/<your-image-name>:${{ github.sha }} .
+          docker build -t figfigacr.azurecr.io/figfig-app:${{ github.sha }} .
 
       - name: Push Docker Image to ACR
         run: |
-          docker push <your-acr-name>.azurecr.io/<your-image-name>:${{ github.sha }}
+          docker push figfigacr.azurecr.io/figfig-app:${{ github.sha }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: <your-webapp-name>
-          images: <your-acr-name>.azurecr.io/<your-image-name>:${{ github.sha }}
+          images: figfigacr.azurecr.io/figfig-app:${{ github.sha }}
