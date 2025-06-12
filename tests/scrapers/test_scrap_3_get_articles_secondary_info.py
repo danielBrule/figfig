@@ -4,6 +4,14 @@ from unittest.mock import patch, MagicMock
 from scrapers.scrap_3_get_articles_secondary_info import ArticlesSecondaryInfoScraper
 from utils.constants import ArticleStageEnum
 
+
+@pytest.fixture(autouse=True)
+def mock_key_vault_secret():
+    with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:
+        mock_get_secret.return_value.value = "fake-password"
+        yield
+
+
 # --- Test _update_stage: success case ---
 @patch("scrapers.scrap_3_get_articles_secondary_info.Session")
 def test_update_stage_success(mock_session_class):

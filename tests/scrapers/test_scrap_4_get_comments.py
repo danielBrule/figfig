@@ -4,6 +4,12 @@ import pytest
 from unittest.mock import patch, MagicMock
 from scrapers.scrap_4_get_comments import CommentsScraper  # Replace with the actual module path
 
+@pytest.fixture(autouse=True)
+def mock_key_vault_secret():
+    with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:
+        mock_get_secret.return_value.value = "fake-password"
+        yield
+
 # -----------------------
 # Test: _get_author & _get_author_type
 # -----------------------

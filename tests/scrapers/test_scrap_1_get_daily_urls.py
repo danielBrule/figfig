@@ -7,6 +7,12 @@ from utils.constants import  NewspaperEnum
 from db.models import SitemapURLs
 
 
+@pytest.fixture(autouse=True)
+def mock_key_vault_secret():
+    with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:
+        mock_get_secret.return_value.value = "fake-password"
+        yield
+        
 # Sample XML response for _get_daily_urls
 SAMPLE_XML = """    
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

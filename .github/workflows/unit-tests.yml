@@ -9,7 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    env:
+      PYTHONPATH: ./src
+      KEY_VAULT_NAME: fake-vault-name 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

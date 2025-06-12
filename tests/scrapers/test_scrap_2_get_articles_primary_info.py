@@ -6,6 +6,13 @@ from utils.constants import ArticleStageEnum
 from scrapers.scrap_2_get_articles_primary_info import ArticlesPrimaryInfoScraper  
 from db.models import SitemapURLs, ArticlesURLs
 
+@pytest.fixture(autouse=True)
+def mock_key_vault_secret():
+    with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:
+        mock_get_secret.return_value.value = "fake-password"
+        yield
+
+
 TEST_SITEMAP_URL = "https://example.com/sitemap.xml"
 FAKE_ARTICLE_XML = """
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
