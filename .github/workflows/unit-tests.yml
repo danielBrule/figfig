@@ -12,6 +12,14 @@ jobs:
     env:
       PYTHONPATH: ./src
       KEY_VAULT_NAME: fake-vault-name 
+      DB_DRIVER: ${{ secrets.DB_DRIVER }}
+      DB_SERVER: ${{ secrets.DB_SERVER }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
