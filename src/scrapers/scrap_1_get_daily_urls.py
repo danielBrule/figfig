@@ -7,7 +7,7 @@ from sqlalchemy import select
 from dateutil.tz import tzoffset
 from sqlalchemy.orm import Session
 
-from db.database import engine
+from db.database import get_engine
 from db.models import SitemapURLs
 from utils.constants import NewspaperEnum, NAMESPACE
 from utils.log import logger
@@ -41,7 +41,7 @@ class DailyURLsScraper:
     def _get_daily_urls_to_process(self):
         logger.info("DailyURLsScraper._remove_existing_sitemap")
         stmt = select(SitemapURLs)
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             existing_urls = session.scalars(stmt).all()
         
         logger.info(f"\t{len(existing_urls)} urls already in the db")
@@ -64,7 +64,7 @@ class DailyURLsScraper:
         
     def _add_new_urls(self):
         logger.info("DailyURLsScraper._add_new_urls")
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             session.add_all(self._l_urls_sitemap_new)
             session.commit()
 
@@ -72,7 +72,7 @@ class DailyURLsScraper:
         
     def _update_urls(self):
         logger.info("DailyURLsScraper._update_urls")
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             session.bulk_update_mappings(SitemapURLs, self._l_urls_sitemap_updated)
             session.commit()
 

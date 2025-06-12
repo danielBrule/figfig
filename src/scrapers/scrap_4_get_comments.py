@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 import json
 import hashlib
-from db.database import engine
+from db.database import get_engine
 from db.models import ArticlesURLs, Articles, Comments
 from utils.log import logger
 from utils.constants import ArticleStageEnum
@@ -22,7 +22,7 @@ class CommentsScraper:
     def _get_article_uid(self):
         logger.info("Comments._get_article_url")
         stmt = select(Articles.uid).where(ArticlesURLs.id == self._article_id)
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             self._articles_uid = session.execute(stmt).scalar_one_or_none()
         logger.info(f"\tUID: {self._articles_uid}")
         
@@ -88,7 +88,7 @@ class CommentsScraper:
 
     def _add_new_comments(self):
         logger.info("Comments._add_new_comments")
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             session.add_all(self._comments)
             session.commit()
 
@@ -99,7 +99,7 @@ class CommentsScraper:
     def _update_stage(self):
         logger.info("Comments._update_stage")
         try:
-            with Session(engine) as session:
+            with Session(get_engine()) as session:
                 obj = (session.query(ArticlesURLs)
                             .filter(ArticlesURLs.id == self._article_id)
                             .one())
@@ -108,7 +108,7 @@ class CommentsScraper:
         except Exception as ex:
             logger.error(f"ArticlesInfo._update_stage - Commit failed: {ex}")
             logger.info(f"\tdelete {self._article_id} from Comments")
-            with Session(engine) as session:
+            with Session(get_engine()) as session:
                 session.rollback()
                 session.query(Comments).filter(Comments.article_id == self._article_id).delete()
                 session.commit()

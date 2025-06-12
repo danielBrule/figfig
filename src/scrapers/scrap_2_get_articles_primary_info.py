@@ -5,7 +5,7 @@ import dateutil
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from db.database import engine
+from db.database import get_engine
 from db.models import ArticlesURLs, SitemapURLs
 from utils.log import logger
 from utils.constants import ArticleStageEnum, NAMESPACE
@@ -24,7 +24,7 @@ class ArticlesPrimaryInfoScraper:
     def _get_sitemap_url(self):
         logger.info("ArticlesPrimaryInfoScraper._get_sitemap_url")
         stmt = select(SitemapURLs.url).where(SitemapURLs.id == self._sitemap_urls_id)
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             self._url_articles_xml = session.execute(stmt).scalar_one_or_none()
 
     def _get_articles_url(self):
@@ -48,7 +48,7 @@ class ArticlesPrimaryInfoScraper:
         logger.info("ArticlesPrimaryInfoScraper._remove_existing_sitemap")
         stmt = select(ArticlesURLs.url).where(ArticlesURLs.url.in_(self._l_all_articles_urls))
 
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             existing_values = {row[0] for row in session.execute(stmt)}
 
         # values NOT in the table
@@ -59,7 +59,7 @@ class ArticlesPrimaryInfoScraper:
 
     def _add_new_urls(self):
         logger.info("ArticlesPrimaryInfoScraper._add_new_urls")
-        with Session(engine) as session:
+        with Session(get_engine()) as session:
             session.add_all(self._orl_articles)
             session.commit()
 
@@ -68,7 +68,7 @@ class ArticlesPrimaryInfoScraper:
     def _update_sitemap_url(self):
         logger.info("ArticlesPrimaryInfoScraper._update_sitemap_url")
         try:
-            with Session(engine) as session:
+            with Session(get_engine()) as session:
                 obj = (session.query(SitemapURLs)
                             .filter(SitemapURLs.id == self._sitemap_urls_id)
                             .one())
@@ -76,7 +76,7 @@ class ArticlesPrimaryInfoScraper:
                 session.commit()#
         except Exception as ex:
             logger.error(f"ArticlesURLs._update_sitemap_url - Commit failed: {ex}")
-            with Session(engine) as session:
+            with Session(get_engine()) as session:
                 session.rollback()
                 session.query(ArticlesURLs).filter(ArticlesURLs.url.in_(self._l_new_articles_urls)).delete(synchronize_session=False)
                 session.commit()

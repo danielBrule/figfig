@@ -1,12 +1,8 @@
 az login 
 
-az login --use-device-code
+REM az login --use-device-code
 
 cd infra
-@REM ../terraform destroy -auto-approve
-@REM ../terraform plan 
-@REM ../terraform apply  -auto-approve
-
 ../terraform destroy -auto-approve; ../terraform init; ../terraform plan ; ../terraform apply  -auto-approve
 
 
@@ -27,7 +23,8 @@ docker run --env-file .env figfigacr.azurecr.io/figfig-app:v1
 REM create service principal, one off not to be reused 
 REM az ad sp create-for-rbac --name figscraper --role Contributor --scopes /subscriptions/051a6d90-968b-4010-896c-8bdb26a892d0
 
-
+REM create venv, one off not be reused 
+REM py -3.13 -m venv venv
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ./venv\Scripts\activate
 REM pip install -r requirements.txt

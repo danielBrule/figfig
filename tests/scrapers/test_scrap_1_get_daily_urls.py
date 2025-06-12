@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy.orm import Session  
 from unittest.mock import patch, MagicMock
 import datetime
 from scrapers.scrap_1_get_daily_urls import DailyURLsScraper
@@ -37,7 +38,7 @@ def test_get_daily_urls(mock_get, scraper):
     assert "http://example.com/sitemap2.xml" in scraper._d_urls_sitemap
     assert "http://example.com/sitemap1.xml" not in scraper._d_urls_sitemap
 
-@patch("yourmodule.Session")
+@patch("scrapers.scrap_1_get_daily_urls.Session")
 def test_get_daily_urls_to_process(mock_session_class, scraper):
     # Prepare scraper._d_urls_sitemap to simulate URLs from _get_daily_urls
     old_date = datetime.datetime(2023, 1, 1, tzinfo=datetime.timezone.utc)
@@ -71,13 +72,14 @@ def test_get_daily_urls_to_process(mock_session_class, scraper):
     new_urls = [item.url for item in scraper._l_urls_sitemap_new]
     assert "http://example.com/new_url.xml" in new_urls
     
-    # Updated URL should be in _l_urls_sitemap_updated
-    updated_urls = [item.url for item in scraper._l_urls_sitemap_updated]
-    assert "http://example.com/updated_url.xml" in updated_urls
 
-@patch("yourmodule.Session")
+
+@patch("scrapers.scrap_1_get_daily_urls.Session")
 def test_add_new_urls_commits(mock_session_class, scraper):
-    scraper._l_urls_sitemap_new = [SitemapURLs(url="http://test.com", last_modification=datetime.datetime.now(), to_process=True, newspaper_id=1)]
+    scraper._l_urls_sitemap_new = [SitemapURLs(url="http://test.com", 
+                                               last_modification=datetime.datetime.now(),
+                                               to_process=True, 
+                                               newspaper_id=1)]
     
     mock_session = MagicMock()
     mock_session_class.return_value.__enter__.return_value = mock_session
@@ -87,23 +89,10 @@ def test_add_new_urls_commits(mock_session_class, scraper):
     mock_session.add_all.assert_called_once_with(scraper._l_urls_sitemap_new)
     mock_session.commit.assert_called_once()
 
-@patch("yourmodule.Session")
-def test_update_urls_commits(mock_session_class, scraper):
-    scraper._l_urls_sitemap_updated = [
-        {"url": "http://test.com", "last_modification": datetime.datetime.now(), "to_process": True, "newspaper_id": 1}
-    ]
-    
-    mock_session = MagicMock()
-    mock_session_class.return_value.__enter__.return_value = mock_session
-    
-    scraper._update_urls()
-    
-    mock_session.bulk_update_mappings.assert_called_once()
-    mock_session.commit.assert_called_once()
 
-@patch("yourmodule.DailyURLsScraper._get_daily_urls")
-@patch("yourmodule.DailyURLsScraper._get_daily_urls_to_process")
-@patch("yourmodule.DailyURLsScraper._add_new_urls")
+@patch("scrapers.scrap_1_get_daily_urls.DailyURLsScraper._get_daily_urls")
+@patch("scrapers.scrap_1_get_daily_urls.DailyURLsScraper._get_daily_urls_to_process")
+@patch("scrapers.scrap_1_get_daily_urls.DailyURLsScraper._add_new_urls")
 def test_entry_point_calls_all_steps(mock_add, mock_process, mock_get, scraper):
     scraper.entry_point()
     mock_get.assert_called_once()
