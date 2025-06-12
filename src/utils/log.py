@@ -2,104 +2,73 @@ import os
 import logging
 from datetime import datetime
 
+DEFAULT_LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+DEFAULT_LOG_DATETIME_FORMAT = "%Y%m%d-%H%M%S"
+DEFAULT_LOG_FILE_PATH = "/home/LogFiles/app-[DATETIME_PLACEHOLDER].log"
 
-
-
-LOG_FILE_PATH = os.getenv("LOG_FILE_PATH")
-LOG_DATETIME_FORMAT = os.getenv("LOG_DATETIME_FORMAT")
-LOG_FORMAT = os.getenv("LOG_FORMAT")
-
-
-# logging.basicConfig(level=logging.INFO)
+LOG_FILE_PATH = os.getenv("LOG_FILE_PATH", DEFAULT_LOG_FILE_PATH)
+LOG_DATETIME_FORMAT = os.getenv("LOG_DATETIME_FORMAT", DEFAULT_LOG_DATETIME_FORMAT)
+LOG_FORMAT = os.getenv("LOG_FORMAT", DEFAULT_LOG_FORMAT)
 
 
 def compute_log_file_path(log_file_path: str, log_datetime_format: str) -> str:
-    """
-    Compute the log file path, including an hour timestamp at the end
-    :param log_file_path: The name of the file to log to.
-    :param log_datetime_format: The format of the datetime to append to the log file name.
-    :return: The log file path.
-    """
+    if "[DATETIME_PLACEHOLDER]" not in log_file_path:
+        raise ValueError("LOG_FILE_PATH must include [DATETIME_PLACEHOLDER]")
     return log_file_path.replace(
         "[DATETIME_PLACEHOLDER]",
-        f"{datetime.now().strftime(log_datetime_format)}",
+        datetime.now().strftime(log_datetime_format)
     )
 
 
 def create_logger(
-    log_format: str | None = None,
+    log_format: str = DEFAULT_LOG_FORMAT,
     log_file_path: str | None = None,
-    log_datetime_format: str | None = None,
+    log_datetime_format: str = DEFAULT_LOG_DATETIME_FORMAT,
     log_level: int = logging.INFO
 ) -> logging.Logger:
-    """
-    Create a logger to log to the console and eventually to a file.
-    :param log_format: The format of the log. If None, the default format will be used.
-    :param log_file_path: The name of the file to log to. If None, no log file will be created.
-    :param log_datetime_format: The format of the datetime to append to the log file name. Must be specified if log_file_path is not None.
-    :return: A logger.
-    """
-    # Default values from settings
-    if log_file_path is None:
-        log_datetime_format = LOG_DATETIME_FORMAT
-
-    # Create a custom logger
     logger_ = logging.getLogger(__name__)
-    logger_.setLevel(log_level) 
+    logger_.setLevel(log_level)
     logger_.propagate = False
-    logger_.handlers.clear()
 
-    
+    # Avoid adding duplicate handlers
+    if logger_.handlers:
+        return logger_
 
-    # Create handlers
-    c_handler = logging.StreamHandler()
-    c_handler.setLevel(log_level)
-    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(logging.Formatter(log_format))
+    logger_.addHandler(console_handler)
 
-    # Create formatters and add it to handlers
-    c_format = logging.Formatter(fmt=log_format)
-
-    # Add formatters to handlers
-    c_handler.setFormatter(c_format)
-
-    # Add handlers to the logger_
-    logger_.handlers.clear()
-    logger_.addHandler(c_handler)
-
-    # Add file handler if log_file_path is provided
+    # File handler if needed
     if log_file_path:
-        log_file_path_ = log_file_path if log_file_path else ""
-        log_datetime_format_ = log_datetime_format if log_datetime_format else ""
-        # Create the directories if they do not exist
-        os.makedirs(os.path.dirname(log_file_path_), exist_ok=True)
-        print(f"Logging to {log_file_path_}")
-
-        # Compute the log file path with timestamp
-        log_file_path_ts = compute_log_file_path(log_file_path_, log_datetime_format_)
-
-        # Create the file handler
-        f_handler = logging.FileHandler(log_file_path_ts, mode="a+", encoding="utf-8")
-        f_handler.setLevel(log_level)
-        f_format = logging.Formatter(fmt=log_format)
-        f_handler.setFormatter(f_format)
-        logger_.addHandler(f_handler)
+        try:
+            full_log_path = compute_log_file_path(log_file_path, log_datetime_format)
+            os.makedirs(os.path.dirname(full_log_path), exist_ok=True)
+            file_handler = logging.FileHandler(full_log_path, mode="a+", encoding="utf-8")
+            file_handler.setLevel(log_level)
+            file_handler.setFormatter(logging.Formatter(log_format))
+            logger_.addHandler(file_handler)
+        except Exception as e:
+            logger_.error(f"Failed to set up file logging: {e}")
 
     return logger_
 
-logging.basicConfig()
-logging.getLogger('sqlalchemy').setLevel(logging.ERROR)
 
+# Configure root logger
+logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
 root_logger = logging.getLogger()
 root_logger.handlers.clear()
 root_logger.propagate = False
 
-logger = create_logger(log_format=LOG_FORMAT, 
-                       log_file_path=LOG_FILE_PATH,
-                       log_datetime_format=LOG_DATETIME_FORMAT,
-                       log_level=logging.INFO)
+# Your main logger
+logger = create_logger(
+    log_format=LOG_FORMAT,
+    log_file_path=LOG_FILE_PATH,
+    log_datetime_format=LOG_DATETIME_FORMAT,
+    log_level=logging.INFO
+)
 
-# Log environment variables
-logger.info("Printing environment variables")
+logger.info("Logger initialized")
 logger.info(f"LOG_FORMAT: {LOG_FORMAT}")
 logger.info(f"LOG_FILE_PATH: {LOG_FILE_PATH}")
-
