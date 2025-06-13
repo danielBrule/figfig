@@ -1,5 +1,5 @@
 {
-  "python.envFile": "${workspaceFolder}/.env",
+  "python.envFile": "${workspaceFolder}/.env.dev",
   "python.analysis.extraPaths": [
     "${workspaceFolder}/src"
   ],
@@ -7,4 +7,5 @@
     "PYTHONPATH": "${workspaceFolder}/src"
   },
   "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe"
+  
 }

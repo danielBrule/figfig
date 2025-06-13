@@ -7,7 +7,8 @@
             "request": "launch",
             "program": "${file}",
             "cwd": "${workspaceFolder}/src",  
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env.dev"
         },
         {
             "name": "Python Debugger: Current File",
@@ -15,7 +16,8 @@
             "request": "launch",
             "program": "${file}",
             "cwd": "${workspaceFolder}/src",  
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+              "envFile": "${workspaceFolder}/.env.dev"
         }
     ]
 }

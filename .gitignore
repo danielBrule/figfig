@@ -18,12 +18,11 @@ htmlcov/
 
 .terraform/
 
-infra/terraform.tfvars
+terraform/terraform.tfvars
 src/terraform.tfstate
 
-infra/.terraform.lock.hcl
-infra/terraform.tfstate
-infra/terraform.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
 
 .env
-terraform.exe

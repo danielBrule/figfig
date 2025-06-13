@@ -1,0 +1,6 @@
+env = "prod"
+sql_password = "Th1s1sAPassw0rd42_production"
+keyvault_name = "figfig-key-vault-prod"
+client_id = "5809b5c3-c9f6-466b-a200-7e3e03d7ef5b"
+tenant_id = "55a6d615-d088-4972-b20b-13aa49223bdb"
+client_secret = "0Hd8Q~kIpTdVgObVpiV0ZFXwFFORoasMFiWXtcFV"
