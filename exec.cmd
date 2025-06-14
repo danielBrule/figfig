@@ -18,11 +18,11 @@ REM terraform destroy -auto-approve; terraform init; terraform apply -auto-appro
 
 
 cd ..
-az acr login --name figfigacr 
+az acr login --name figfigacrdev
 
 REM docker build -t figfigacr.azurecr.io/figfig-app:v1 .
 
-docker build --build-arg ENV=dev -t figfigacr.azurecr.io/figfig-app:dev .
+docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacr.azurecr.io/figfig-app:dev .
 REM docker build --build-arg ENV=prod -t figfigacr.azurecr.io/figfig-app:latest .
 
 

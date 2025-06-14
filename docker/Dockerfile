@@ -25,7 +25,7 @@ COPY .env.${ENV} .env
 COPY src/ ./src/
 
 # Entry point setup
-COPY entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Use an explicit working directory for app run
