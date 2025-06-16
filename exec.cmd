@@ -20,17 +20,15 @@ REM terraform destroy -auto-approve; terraform init; terraform apply -auto-appro
 cd ..
 az acr login --name figfigacrdev
 
-REM docker build -t figfigacr.azurecr.io/figfig-app:v1 .
-
-docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacr.azurecr.io/figfig-app:dev .
+docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:dev .
 REM docker build --build-arg ENV=prod -t figfigacr.azurecr.io/figfig-app:latest .
 
 
-docker push figfigacr.azurecr.io/figfig-app:v1 
+docker push figfigacrdev.azurecr.io/figfig-app:dev
 
 REM az keyvault set-policy --name figfig-key-vault-dev --spn 5809b5c3-c9f6-466b-a200-7e3e03d7ef5b --secret-permissions get list
 
-docker run --env-file .env figfigacr.azurecr.io/figfig-app:v1
+docker run --env-file .env.dev figfigacrdev.azurecr.io/figfig-app:dev
 
 
 

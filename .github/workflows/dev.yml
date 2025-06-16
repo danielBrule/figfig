@@ -1,0 +1,45 @@
+name: Dev Deployment
+
+on:
+  push:
+    branches: ["dev"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init + Apply
+        working-directory: terraform/envs/dev
+        run: |
+          terraform init -backend-config="envs/dev/backend.tf"
+          terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars"
+
+      - name: Retrieve ACR Login Server from Terraform Output
+        id: acr_output
+        working-directory: terraform/envs/dev
+        run: |
+          ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+          echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+
+      - name: Docker Login to ACR
+        run: |
+          echo "${{ secrets.AZURE_CLIENT_SECRET }}" | docker login ${{ steps.acr_output.outputs.acr_login_server }} -u ${{ secrets.AZURE_CLIENT_ID }} --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -f docker/Dockerfile --build-arg ENV=dev -t ${{ steps.acr_output.outputs.acr_login_server }}/figfig-app:dev .
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ steps.acr_output.outputs.acr_login_server }}/figfig-app:dev
