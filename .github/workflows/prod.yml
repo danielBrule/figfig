@@ -1,0 +1,21 @@
+name: Prod Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker Build
+        run: docker build --build-arg ENV=prod -t my-app:prod .
+
+      - name: Terraform Init + Apply
+        working-directory: terraform/prod
+        run: |
+          terraform init -backend-config="prod-backend.conf"
+          terraform apply -auto-approve -var-file="prod.tfvars"

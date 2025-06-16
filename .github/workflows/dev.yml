@@ -1,0 +1,35 @@
+name: Dev Deployment
+
+on:
+  push:
+    branches: ["dev"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Docker Login to ACR
+        run: echo "${{ secrets.AZURE_CLIENT_SECRET }}" | docker login figfigacr.azurecr.io -u ${{ secrets.AZURE_CLIENT_ID }} --password-stdin
+
+      - name: Build Docker Image
+        run: docker build --build-arg ENV=dev -t figfigacr.azurecr.io/figfig-app:dev .
+
+      - name: Push Docker Image
+        run: docker push figfigacr.azurecr.io/figfig-app:dev
+
+      - name: Terraform Init + Apply
+        working-directory: terraform/envs/dev
+        run: |
+          terraform init -backend-config="backend.tf"
+          terraform apply -auto-approve -var-file="terraform.tfvars"
