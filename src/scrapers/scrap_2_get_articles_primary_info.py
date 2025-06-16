@@ -67,7 +67,7 @@ class ArticlesPrimaryInfoScraper:
 
     def _update_sitemap_url(self):
         logger.info("ArticlesPrimaryInfoScraper._update_sitemap_url")
-        try:
+        try: 
             with Session(get_engine()) as session:
                 obj = (session.query(SitemapURLs)
                             .filter(SitemapURLs.id == self._sitemap_urls_id)
