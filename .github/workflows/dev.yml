@@ -16,6 +16,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug Secret Inputs
+        run: |
+          echo "CLIENT ID: ${AZURE_CLIENT_ID:0:5}***"
+          echo "TENANT ID: ${AZURE_TENANT_ID:0:5}***"
+          echo "SUBSCRIPTION ID: ${AZURE_SUBSCRIPTION_ID:0:5}***"
+          env:
+            AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+            AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+            AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Azure Login
         uses: azure/login@v2
         with:
