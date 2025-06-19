@@ -27,12 +27,12 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        
+
       - name: Terraform Init + Apply
         working-directory: terraform/envs/dev
         run: |
-          terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars"
+          terraform init -backend-config="backend.tf"
+          terraform apply -auto-approve -var-file="terraform.tfvars"
 
       - name: Retrieve ACR Login Server from Terraform Output
         id: acr_output
