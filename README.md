@@ -67,7 +67,7 @@ $json = @{
 REM # Save to a file
 $json | Out-File -Encoding utf8 federated.json
 
-az ad app federated-credential create --id <appid> --parameters $federated.json
+az ad app federated-credential create --id <appid> --parameters federated.json
 
 
 REM prod
@@ -81,7 +81,7 @@ $json = @{
 REM # Save to a file
 $json | Out-File -Encoding utf8 federated.json
 
-az ad app federated-credential create --id <appid> --parameters $federated.json
+az ad app federated-credential create --id <appid> --parameters federated.json
 
 
 ```
