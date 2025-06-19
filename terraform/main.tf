@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.90"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.47.0"
+    }
   }
 
   backend "azurerm" {}  
@@ -13,8 +17,14 @@ provider "azurerm" {
   features {}
   subscription_id = "051a6d90-968b-4010-896c-8bdb26a892d0"
 }
+
+provider "azuread" {}
+
 data "azurerm_client_config" "current" {}
 
+data "azuread_service_principal" "github_oidc" {
+  client_id = var.client_id
+}
 
 #--------------------------
 # Random
@@ -235,6 +245,15 @@ resource "azurerm_key_vault" "main" {
 
     secret_permissions = [
       "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
+    ]
+  }
+
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azuread_service_principal.github_oidc.object_id
+
+    secret_permissions = [
+      "Get", "List"
     ]
   }
 }
