@@ -38,9 +38,9 @@ jobs:
           ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
           echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
 
-      - name: Docker Login to ACR
+      - name: Docker Login to ACR using Azure CLI
         run: |
-          echo "${{ secrets.AZURE_CLIENT_SECRET }}" | docker login ${{ steps.acr_output.outputs.acr_login_server }} -u ${{ secrets.AZURE_CLIENT_ID }} --password-stdin
+          az acr login --name ${{ steps.acr_output.outputs.acr_login_server | split('.')[0] }}
 
       - name: Build Docker Image
         run: |

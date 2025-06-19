@@ -26,3 +26,4 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 
 .env
+federated.json
