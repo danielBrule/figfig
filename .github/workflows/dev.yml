@@ -36,11 +36,13 @@ jobs:
         working-directory: terraform/envs/dev
         run: |
           ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
+          ACR_NAME=$(echo $ACR_LOGIN_SERVER | cut -d '.' -f 1)
           echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+          echo "acr_name=$ACR_NAME" >> $GITHUB_OUTPUT
 
       - name: Docker Login to ACR using Azure CLI
         run: |
-          az acr login --name ${{ steps.acr_output.outputs.acr_login_server | split('.')[0] }}
+          az acr login --name ${{ steps.acr_output.outputs.acr_name }}
 
       - name: Build Docker Image
         run: |
