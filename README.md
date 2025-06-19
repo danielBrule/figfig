@@ -51,6 +51,42 @@ pip install -r requirements.txt
 ```
 
 
+## 2.4. Setting Up Azure Federated Identity for GitHub Actions
+
+This section documents the configuration of federated identity credentials in Azure AD to enable secure, passwordless authentication for GitHub Actions using OpenID Connect (OIDC). It includes steps to link a GitHub repo branch to a service principal via Azure CLI.
+
+```cmd
+REM DEV
+$json = @{
+>>   name        = "github-actions-dev"
+>>   issuer      = "https://token.actions.githubusercontent.com"
+>>   subject     = "repo:danielBrule/figfig:ref:refs/heads/dev"
+>>   description = "Federated identity for GitHub Actions"
+>>   audiences   = @("api://AzureADTokenExchange")
+>> } | ConvertTo-Json -Depth 3
+REM # Save to a file
+$json | Out-File -Encoding utf8 federated.json
+
+az ad app federated-credential create --id <appid> --parameters $federated.json
+
+
+REM prod
+$json = @{
+>>   name        = "github-actions-prod"
+>>   issuer      = "https://token.actions.githubusercontent.com"
+>>   subject     = "repo:danielBrule/figfig:ref:refs/heads/prod"
+>>   description = "Federated identity for GitHub Actions"
+>>   audiences   = @("api://AzureADTokenExchange")
+>> } | ConvertTo-Json -Depth 3
+REM # Save to a file
+$json | Out-File -Encoding utf8 federated.json
+
+az ad app federated-credential create --id <appid> --parameters $federated.json
+
+
+```
+
+
 # 3. Login
 ```az login ```
 
@@ -68,7 +104,7 @@ cd terraform
 terraform destroy -auto-approve -var-file="envs/dev/terraform.tfvars"
 terraform init -backend-config="envs/dev/backend.tf"
 terraform plan -var-file="envs/dev/terraform.tfvars"
-terraform apply -var-file="envs/dev/terraform.tfvars" -auto-approve
+terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars" 
 
 REM PROD
 terraform destroy -auto-approve -var-file="envs/prod/terraform.tfvars"
