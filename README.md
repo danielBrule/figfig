@@ -1,7 +1,7 @@
 # 1. README
 view preview: 
 `Ctrl+Shift+V`
-test
+
 # 2. Initialisation 
 ## 2.1.  figfig-tfstate-rg
 The figfig-tfstate-rg resource group is used to store the Terraform state remotely in Azure. This is a best practice to enable collaboration and state locking, especially when multiple people or environments manage the same infrastructure.
