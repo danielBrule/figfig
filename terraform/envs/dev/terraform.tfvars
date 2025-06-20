@@ -1,0 +1,6 @@
+env = "dev"
+sql_password = "Th1s1sAPassw0rd42"
+client_id = "2541c52e-b10b-4baf-bb7f-6cc397d21b24"
+tenant_id = "55a6d615-d088-4972-b20b-13aa49223bdb"
+client_secret = "bdp8Q~ulsZyc015KjoIJY5OmCWVeVIC9Y7.DFbf."
+keyvault_name = "figfig-key-vault-dev"

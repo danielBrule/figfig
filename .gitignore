@@ -1,1 +1,29 @@
-infra/terraform.tfvars
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+
+
+# Test & coverage outputs
+htmlcov/
+.coverage
+.cache/
+.pytest_cache/
+
+
+.terraform/
+
+terraform/terraform.tfvars
+src/terraform.tfstate
+
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+.env
+federated.json

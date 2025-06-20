@@ -1,0 +1,11 @@
+sqlalchemy>=2.0
+pyodbc
+python-dotenv
+pytest-dotenv
+pandas
+urllib3
+requests
+beautifulsoup4
+azure-identity
+azure-keyvault-secrets
+pytest
