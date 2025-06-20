@@ -1,8 +1,8 @@
-name: Dev Deployment
+name: Prod Deployment
 
 on:
   push:
-    branches: ["dev"]
+    branches: ["main"]
 
 permissions:
   id-token: write
@@ -31,17 +31,18 @@ jobs:
       - name: Terraform Init + Apply
         working-directory: terraform
         run: |
-          terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars"
+          terraform init -backend-config="envs/prod/backend.tf"
+          terraform apply -auto-approve -var-file="envs/prod/terraform.tfvars"
 
       - name: Docker Login to ACR using Azure CLI
         run: |
-          az acr login --name figfigacrdev
+          az acr login --name figfigacrprod
 
       - name: Build Docker Image
         run: |
-          docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:dev .
+          docker build -f docker/Dockerfile --build-arg ENV=prod -t figfigacrprod.azurecr.io/figfig-app:pro .
 
       - name: Push Docker Image
         run: |
-          docker push figfigacrdev.azurecr.io/figfig-app:dev
+          docker push figfigacrprod.azurecr.io/figfig-app:prod
+ 
