@@ -5,8 +5,8 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: read
   id-token: write
+  contents: read
 
 jobs:
   build-and-deploy:
@@ -15,7 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
 
       - name: Azure Login
         uses: azure/login@v2
@@ -26,27 +25,24 @@ jobs:
           # auth-type: IDENTITY
           enable-AzPSSession: true
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+          
       - name: Terraform Init + Apply
-        working-directory: terraform/envs/prod
+        working-directory: terraform
         run: |
           terraform init -backend-config="envs/prod/backend.tf"
           terraform apply -auto-approve -var-file="envs/prod/terraform.tfvars"
 
-      - name: Retrieve ACR Login Server from Terraform Output
-        id: acr_output
-        working-directory: terraform/envs/prod
+      - name: Docker Login to ACR using Azure CLI
         run: |
-          ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)
-          echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
-
-      - name: Docker Login to ACR
-        run: |
-          echo "${{ secrets.AZURE_CLIENT_SECRET }}" | docker login ${{ steps.acr_output.outputs.acr_login_server }} -u ${{ secrets.AZURE_CLIENT_ID }} --password-stdin
+          az acr login --name figfigacrprod
 
       - name: Build Docker Image
         run: |
-          docker build -f docker/Dockerfile --build-arg ENV=prod -t ${{ steps.acr_output.outputs.acr_login_server }}/figfig-app:prod .
+          docker build -f docker/Dockerfile --build-arg ENV=prod -t figfigacrprod.azurecr.io/figfig-app:pro .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ steps.acr_output.outputs.acr_login_server }}/figfig-app:prod
+          docker push figfigacrprod.azurecr.io/figfig-app:prod
+ 
