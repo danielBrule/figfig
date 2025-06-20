@@ -32,7 +32,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform init -backend-config="envs/prod/backend.tf"
-          terraform apply -auto-approve -var-file="envs/prod/terraform.tfvars"
+          terraform apply -lock-timeout=60s -auto-approve -var-file="envs/prod/terraform.tfvars"
 
       - name: Docker Login to ACR using Azure CLI
         run: |
