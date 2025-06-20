@@ -29,6 +29,10 @@ REM * AppId: The client ID of the service principal
 REM * Password: The client secret (used like a password)
 REM * Tenant: The Azure AD tenant ID
 
+az role assignment create --assignee <AppID> --role "User Access Administrator" --scope /subscriptions/051a6d90-968b-4010-896c-8bdb26a892d0
+  
+  
+  
 
 REM DELETE SP
 az ad sp list --display-name figscraper_sp --query "[].{Name:displayName, AppId:appId, ObjectId:objectId}" -o table
