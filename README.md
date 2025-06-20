@@ -78,7 +78,7 @@ REM prod
 $json = @{
 >>   name        = "github-actions-prod"
 >>   issuer      = "https://token.actions.githubusercontent.com"
->>   subject     = "repo:danielBrule/figfig:ref:refs/heads/prod"
+>>   subject     = "repo:danielBrule/figfig:ref:refs/heads/main"
 >>   description = "Federated identity for GitHub Actions"
 >>   audiences   = @("api://AzureADTokenExchange")
 >> } | ConvertTo-Json -Depth 3
