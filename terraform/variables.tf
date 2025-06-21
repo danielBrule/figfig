@@ -34,6 +34,7 @@ variable "sql_password" {
   sensitive   = true
 }
 
+
 variable "keyvault_name" {
   default = "figfig-key-vault"
 }

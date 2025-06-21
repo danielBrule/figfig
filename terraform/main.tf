@@ -10,7 +10,7 @@ terraform {
     }
   }
 
-  backend "azurerm" {}  
+  backend "azurerm" {}
 }
 
 provider "azurerm" {
@@ -57,23 +57,9 @@ resource "azurerm_subnet" "new_public_subnet" {
 
 resource "azurerm_virtual_network" "my_vnet" {
   name                = "my-vnet-${var.env}"
-  address_space       = ["10.0.0.0/16", "212.36.188.0/24"]  # Include your public IP block
+  address_space       = ["10.0.0.0/16", "212.36.188.0/24"]
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-}
-
-
-
-
-#--------------------------
-# App Service Plan (Linux)
-#--------------------------
-resource "azurerm_service_plan" "asp" {
-  name                = "${var.project_name}-plan-${var.env}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  os_type             = "Linux"
-  sku_name            = "B1"
 }
 
 #--------------------------
@@ -87,71 +73,6 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled       = true
 }
 
-#--------------------------
-# Web App for Container
-#--------------------------
-resource "azurerm_user_assigned_identity" "webapp_identity" {
-  name                = "${var.project_name}-identity-${var.env}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-}
-
-
-# Assign ACR Pull role to the user-assigned identity for your web app
-resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.acr.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_user_assigned_identity.webapp_identity.principal_id
-}
-
-
-
-resource "azurerm_linux_web_app" "webapp" {
-  name                = "${var.project_name}-webapp-${var.env}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  service_plan_id     = azurerm_service_plan.asp.id
-
-  identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.webapp_identity.id]
-  }
-
-  site_config {
-    always_on = "true"
-  }
-
-  # Grant your web app identity permission to pull images from ACR
-  depends_on = [
-    azurerm_role_assignment.acr_pull
-  ]
-
-  app_settings = {
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
-
-    SQL_SERVER_ENDPOINT = azurerm_mssql_server.sql.fully_qualified_domain_name
-    SQL_DATABASE_NAME   = azurerm_mssql_database.db.name
-    KEY_VAULT_NAME      = azurerm_key_vault.main.name
-
-    AZURE_CLIENT_ID     = var.client_id
-    AZURE_TENANT_ID     = var.tenant_id
-    AZURE_CLIENT_SECRET = var.client_secret
-
-    DB_SERVER           = "figscraper-sql.database.windows.net"
-    DB_NAME             = "figscraper-db"
-    DB_USER             = "sqladminuser"
-    DB_DRIVER           = "ODBC Driver 17 for SQL Server"
-    LOG_DATETIME_FORMAT = "%Y-%m-%d_%H"
-    LOG_FORMAT          = "%(asctime)s - %(levelname)s - %(message)s"
-
-    ENV = var.env
-  }
-}
-
-
-#--------------------------
-# SQL Server + DB
-#--------------------------
 resource "azurerm_mssql_server" "sql" {
   name                         = "${var.project_name}-sql-${var.env}"
   resource_group_name          = azurerm_resource_group.main.name
@@ -196,32 +117,29 @@ resource "azurerm_servicebus_namespace" "sb_namespace" {
 }
 
 resource "azurerm_servicebus_queue" "queue_articlesxml" {
-  name                = "queue_articles_xml"
-  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
-  max_size_in_megabytes = 1024
+  name                    = "queue_articles_xml"
+  namespace_id            = azurerm_servicebus_namespace.sb_namespace.id
+  max_size_in_megabytes   = 1024
 }
 
 resource "azurerm_servicebus_queue" "queue_articles" {
-  name                = "queue_articles"
-  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
-
-  max_size_in_megabytes = 1024
+  name                    = "queue_articles"
+  namespace_id            = azurerm_servicebus_namespace.sb_namespace.id
+  max_size_in_megabytes   = 1024
 }
 
 resource "azurerm_servicebus_queue" "queue_comments" {
-  name                = "queue_comments"
-  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
-
-  max_size_in_megabytes = 1024
+  name                    = "queue_comments"
+  namespace_id            = azurerm_servicebus_namespace.sb_namespace.id
+  max_size_in_megabytes   = 1024
 }
 
 resource "azurerm_servicebus_namespace_authorization_rule" "queue_auth_rule" {
-  name                = "queue_auth_rule"
-  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
-
-  listen = true
-  send   = true
-  manage = false
+  name         = "queue_auth_rule"
+  namespace_id = azurerm_servicebus_namespace.sb_namespace.id
+  listen       = true
+  send         = true
+  manage       = false
 }
 
 
@@ -242,19 +160,13 @@ resource "azurerm_key_vault" "main" {
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
-
-    secret_permissions = [
-      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"
-    ]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
   }
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azuread_service_principal.github_oidc.object_id
-
-    secret_permissions = [
-      "Get", "List"
-    ]
+    secret_permissions = ["Get", "List"]
   }
 }
 
@@ -264,3 +176,120 @@ resource "azurerm_key_vault_secret" "sql_password" {
   key_vault_id = azurerm_key_vault.main.id
 }
 
+
+resource "azurerm_key_vault_secret" "servicebus_connection_string" {
+  name         = "servicebus-conn-string"
+  value        = azurerm_servicebus_namespace_authorization_rule.queue_auth_rule.primary_connection_string
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+
+# Azure Container Instances
+
+resource "azurerm_container_group" "scrap_primary" {
+  name                = "scrap-primary-${var.env}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  os_type             = "Linux"
+  restart_policy      = "Never"
+
+  container {
+    name   = "scraper"
+    image  = "${azurerm_container_registry.acr.login_server}/${var.image_name}:latest"
+    cpu    = "1"
+    memory = "1.5"
+
+
+
+    secure_environment_variables = {
+      DB_PASSWORD = var.sql_password
+      SERVICE_BUS_CONN_STR  = azurerm_key_vault_secret.servicebus_connection_string.value
+    }
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+  }
+
+  image_registry_credential {
+    server   = azurerm_container_registry.acr.login_server
+    username = azurerm_container_registry.acr.admin_username
+    password = azurerm_container_registry.acr.admin_password
+  }
+
+  tags = {
+    environment = var.env
+  }
+}
+
+resource "azurerm_container_group" "scrap_second" {
+  name                = "scrap-second-${var.env}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  os_type             = "Linux"
+  restart_policy      = "Never"
+
+  container {
+    name   = "scraper"
+    image  = "${azurerm_container_registry.acr.login_server}/${var.image_name}:latest"
+    cpu    = "1"
+    memory = "1.5"
+
+
+    secure_environment_variables = {
+      DB_PASSWORD = var.sql_password
+      SERVICE_BUS_CONN_STR  = azurerm_key_vault_secret.servicebus_connection_string.value
+    }
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+  }
+
+  image_registry_credential {
+    server   = azurerm_container_registry.acr.login_server
+    username = azurerm_container_registry.acr.admin_username
+    password = azurerm_container_registry.acr.admin_password
+  }
+
+  tags = {
+    environment = var.env
+  }
+}
+
+resource "azurerm_container_group" "scrap_third" {
+  name                = "scrap-third-${var.env}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  os_type             = "Linux"
+  restart_policy      = "Never"
+
+  container {
+    name   = "scraper"
+    image  = "${azurerm_container_registry.acr.login_server}/${var.image_name}:latest"
+    cpu    = "1"
+    memory = "1.5"
+
+    secure_environment_variables = {
+      DB_PASSWORD = var.sql_password
+      SERVICE_BUS_CONN_STR  = azurerm_key_vault_secret.servicebus_connection_string.value
+    }
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+  }
+
+  image_registry_credential {
+    server   = azurerm_container_registry.acr.login_server
+    username = azurerm_container_registry.acr.admin_username
+    password = azurerm_container_registry.acr.admin_password
+  }
+
+  tags = {
+    environment = var.env
+  }
+}

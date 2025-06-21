@@ -160,3 +160,16 @@ REM RESET AZURE_CLIENT_SECRET (pwd):
 az ad app credential reset --id $APP_ID --append --display-name "GitHub Actions Secret" --years 1
 
 ```
+
+
+
+# 7. Feature Matrix: ACI, AKS, and App Services
+| Feature                 | ACI                          | AKS                          | App Services for Containers       |
+|-------------------------|------------------------------|-------------------------------|-----------------------------------|
+| Management overhead     | Very Low                     | High                          | Low                               |
+| Scaling                 | Manual / via Logic Apps      | Auto (pods, nodes)            | Auto (limited)                    |
+| Best for                | Jobs, events, scrapers       | Complex, large systems        | APIs, daemons, long-run           |
+| Pricing model           | Per-second while running     | Per node/pod                  | Per-instance/hourly               |
+| Start-up time           | Fast                         | Moderate                      | Fast                              |
+| Networking control      | Limited (unless in VNet)     | Full VNet, NSG, Ingress       | Limited                           |
+| Orchestration features  | None                         | Full Kubernetes               | Minimal                           |
