@@ -34,7 +34,14 @@ jobs:
       - name: Force Unlock Terraform State (manual emergency only)
         if: always()
         working-directory: terraform
-        run: terraform force-unlock -force c356c0d0-c09d-d7e6-3e3e-804c609f27ae    
+        run: |
+            LOCK_ID=$(terraform force-unlock 2>&1 | grep -oE '[0-9a-fA-F-]{36}' || true)
+            if [ ! -z "$LOCK_ID" ]; then
+              echo "Force unlocking with ID: $LOCK_ID"
+              terraform force-unlock -force $LOCK_ID || true
+            else
+              echo "No lock ID found, skipping unlock."
+            fi
       - name: Import Resource Group (if needed)
         working-directory: terraform
         run: |
