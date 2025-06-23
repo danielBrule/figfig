@@ -32,46 +32,30 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config="envs/dev/backend.tf"
 
-      - name: 🧹 Handle Stuck State Lock (if needed)
+      - name: 🧹 Force Unlock (if needed)
         if: always()
         working-directory: terraform
         run: |
-          LOCK_ID=$(terraform force-unlock --dry-run 2>&1 | grep -oP 'Lock ID: \K\S+') || true
-          if [ ! -z "$LOCK_ID" ]; then
-            echo "⚠️ Forcing unlock of stuck state lock ID: $LOCK_ID"
-            terraform force-unlock -force "$LOCK_ID"
-          else
-            echo "✅ No active lock to force unlock"
-          fi
+          terraform force-unlock -force $(terraform force-unlock --dry-run 2>&1 | grep -oP 'Lock ID: \K\S+') || true
 
-      - name: 📦 Import Resource Group (if needed)
+      - name: 📦 Import Resources (only if needed)
         working-directory: terraform
         run: |
           terraform state show azurerm_resource_group.main || \
-          terraform import -lock-timeout=60s azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
+          terraform import azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
 
-      - name: 📦 Import ACR (if needed)
-        working-directory: terraform
-        run: |
-          terraform state list -lock=false | grep module.acr.azurerm_container_registry.acr || \
-          terraform import -lock-timeout=60s module.acr.azurerm_container_registry.acr "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.ContainerRegistry/registries/figfigacrdev"
+          terraform state list | grep module.acr.azurerm_container_registry.acr || \
+          terraform import module.acr.azurerm_container_registry.acr "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.ContainerRegistry/registries/figfigacrdev"
 
-      - name: 📦 Import Virtual Network (if needed)
-        working-directory: terraform
-        run: |
           terraform state show module.network.azurerm_virtual_network.vnet || \
-          terraform import -lock-timeout=60s module.network.azurerm_virtual_network.vnet "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev"
+          terraform import module.network.azurerm_virtual_network.vnet "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev"
 
-      - name: 📦 Import Subnet (if needed)
-        working-directory: terraform
-        run: |
           terraform state show module.network.azurerm_subnet.public || \
-          terraform import -lock-timeout=60s module.network.azurerm_subnet.public "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev/subnets/public-subnet-dev"
+          terraform import module.network.azurerm_subnet.public "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev/subnets/public-subnet-dev"
 
       - name: ⚙️ Terraform Apply Core (Network, ACR)
         working-directory: terraform
         run: |
-          terraform init -backend-config="envs/dev/backend.tf"
           terraform apply -lock-timeout=300s -auto-approve -var-file="envs/dev/terraform.tfvars" \
             -target=module.network -target=module.acr
 
@@ -101,9 +85,5 @@ jobs:
 
       - name: 🧱 Setup Terraform
         uses: hashicorp/setup-terraform@v3
-
-      - name: ⚙️ Terraform Apply Remaining Infra
-        working-directory: terraform
-        run: |
-          terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -lock-timeout=300s -auto-approve -var-file="envs/dev/terraform.tfvars"
+        with:
+          terraform_version: 1.6.6
