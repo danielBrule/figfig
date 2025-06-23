@@ -1,15 +1,13 @@
-# terraform/main.tf
-
 terraform {
   backend "azurerm" {}
 }
 
 provider "azurerm" {
   features {}
+  use_oidc        = true
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
   client_id       = var.client_id
-  client_secret   = var.client_secret
 }
 
 provider "azuread" {}

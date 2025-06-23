@@ -5,6 +5,7 @@ on:
     branches: ["dev"]
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -15,12 +16,13 @@ jobs:
       - name: 🔄 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🔐 Azure Login (Service Principal)
+      - name: 🔐 Azure Login with OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: false
 
       - name: 🧱 Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -63,17 +65,16 @@ jobs:
       - name: 🔄 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🔐 Azure Login (Service Principal)
+      - name: 🔐 Azure Login with OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: false
 
       - name: 🧱 Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
 
       - name: ⚙️ Terraform Apply Remaining Infra
         working-directory: terraform
