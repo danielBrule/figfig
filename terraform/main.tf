@@ -1,5 +1,9 @@
 # terraform/main.tf
 
+terraform {
+  backend "azurerm" {}
+}
+
 provider "azurerm" {
   features {}
   subscription_id = var.subscription_id
@@ -62,8 +66,8 @@ module "keyvault" {
   keyvault_name       = var.keyvault_name
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
- client_config       = data.azurerm_client_config.current
- github_oidc         = data.azuread_service_principal.github_oidc
+  client_config       = data.azurerm_client_config.current
+  github_oidc         = data.azuread_service_principal.github_oidc
   sql_password        = var.sql_password
   servicebus_conn     = module.servicebus.primary_connection_string
 }
