@@ -37,6 +37,15 @@ jobs:
           terraform state show azurerm_resource_group.main || \
           terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev
 
+      - name: Terraform Import Existing Resources (if needed)
+        working-directory: terraform
+        run: |
+          terraform import azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev" || true
+          terraform import module.acr.azurerm_container_registry.acr "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.ContainerRegistry/registries/figfigacrdev" || true
+          terraform import module.network.azurerm_virtual_network.vnet "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev" || true
+          terraform import module.network.azurerm_subnet.public "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev/subnets/public-subnet-dev" || true
+
+          
 
       - name: Terraform Init & Apply Core (Network, ACR)
         working-directory: terraform
