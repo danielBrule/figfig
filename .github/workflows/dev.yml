@@ -25,6 +25,8 @@ jobs:
 
       - name: 🧱 Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
 
       - name: 🚀 Init Terraform (for import)
         working-directory: terraform
