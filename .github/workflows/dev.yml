@@ -37,15 +37,22 @@ jobs:
           terraform state show azurerm_resource_group.main || \
           terraform import -lock-timeout=60s azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
 
-      - name: Terraform Import Existing Resources (if needed)
+      - name: Terraform Import ACR (if needed)
         working-directory: terraform
         run: |
-          terraform state show module.acr.azurerm_container_registry.acr || \
+          terraform state list | grep module.acr.azurerm_container_registry.acr || \
           terraform import -lock-timeout=60s module.acr.azurerm_container_registry.acr "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.ContainerRegistry/registries/figfigacrdev"
+     
 
+      - name: Terraform Import virtual network (if needed)
+        working-directory: terraform
+        run: |
           terraform state show module.network.azurerm_virtual_network.vnet || \
           terraform import -lock-timeout=60s module.network.azurerm_virtual_network.vnet "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev"
 
+      - name: Terraform Import subnet (if needed)
+        working-directory: terraform
+        run: |
           terraform state show module.network.azurerm_subnet.public || \
           terraform import -lock-timeout=60s module.network.azurerm_subnet.public "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev/subnets/public-subnet-dev"
           
