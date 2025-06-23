@@ -105,13 +105,19 @@ Alternatively:
 ```cmd
 REM DEV
 cd terraform
+terraform destroy -auto-approve -var-file="envs/dev/terraform.tfvars"
 terraform init -backend-config="envs/dev/backend.tf"
 terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/dev/terraform.tfvars" 
 terraform apply -target="module.acr" -var-file="envs/dev/terraform.tfvars" -auto-approve
 az acr login --name figfigacrdev
 docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:latest .
 docker push figfigacrdev.azurecr.io/figfig-app:latest
- REM PROD
+
+
+
+
+REM PROD
+terraform destroy -auto-approve -var-file="envs/prod/terraform.tfvars"
 terraform init -backend-config="envs/prod/backend.tf"
 terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/prod/terraform.tfvars" 
 terraform apply -target="module.acr" -var-file="envs/prod/terraform.tfvars" -auto-approve

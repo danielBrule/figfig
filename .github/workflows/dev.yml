@@ -44,7 +44,7 @@ jobs:
           docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:latest .
       - name: Push Docker Image
         run: |
-          docker push figfigacrdev.azurecr.io/figfig-app:dev
+          docker push figfigacrdev.azurecr.io/figfig-app:latest
 
       - name: Create DB, Service Bus, Key Vault
         run: |
