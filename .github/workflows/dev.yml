@@ -27,6 +27,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Import Resource Group (if needed)
+        working-directory: terraform
         run: |
           terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev || true
 
