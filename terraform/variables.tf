@@ -19,6 +19,7 @@ variable "project_name" {
 
 variable "acr_name" {
   default = "figfigacr"
+  type        = string
 }
 
 variable "image_name" {
@@ -48,6 +49,11 @@ variable "tenant_id" {
 }
 
 variable "client_secret" {
+  sensitive   = true
+}
+
+
+variable "subscription_id" {
   sensitive   = true
 }
 

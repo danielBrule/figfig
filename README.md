@@ -100,48 +100,43 @@ Alternatively:
 [login URL](https://microsoft.com/devicelogin)
 
 
-# 4. Creation terraform from vs code 
+# 4. Creation terraform / docker from vs code 
 
 ```cmd
 REM DEV
 cd terraform
-terraform destroy -auto-approve -var-file="envs/dev/terraform.tfvars"
 terraform init -backend-config="envs/dev/backend.tf"
-terraform plan -var-file="envs/dev/terraform.tfvars"
-terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars" 
+terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/dev/terraform.tfvars" 
+terraform apply -target="module.acr" -var-file="envs/dev/terraform.tfvars" -auto-approve
+az acr login --name figfigacrdev
+docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:latest .
+docker push figfigacrdev.azurecr.io/figfig-app:latest
+terraform apply -target="module.sql" -var-file="envs/dev/terraform.tfvars" -auto-approve
+terraform apply -target="module.servicebus" -var-file="envs/dev/terraform.tfvars" -auto-approve
+terraform apply -target="module.keyvault" -var-file="envs/dev/terraform.tfvars" -auto-approve
+terraform apply -target="module.containers" -var-file="envs/dev/terraform.tfvars" -auto-approve
+
 
 REM PROD
-terraform destroy -auto-approve -var-file="envs/prod/terraform.tfvars"
-terraform init -backend-config="envs/prod/backend.tf" -reconfigure
-terraform plan -var-file="envs/prod/terraform.tfvars"
-terraform apply -var-file="envs/prod/terraform.tfvars" -auto-approve
+terraform init -backend-config="envs/prod/backend.tf"
+terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/prod/terraform.tfvars" 
+terraform apply -target="module.acr" -var-file="envs/prod/terraform.tfvars" -auto-approve
+
+az acr login --name figfigacrprod
+docker build -f docker/Dockerfile --build-arg ENV=prod -t figfigacrprod.azurecr.io/figfig-app:latest .
+docker push figfigacrprod.azurecr.io/figfig-app:latest
+
+terraform apply -target="module.sql" -var-file="envs/prod/terraform.tfvars" -auto-approve
+terraform apply -target="module.servicebus" -var-file="envs/prod/terraform.tfvars" -auto-approve
+terraform apply -target="module.keyvault" -var-file="envs/prod/terraform.tfvars" -auto-approve
+terraform apply -target="module.containers" -var-file="envs/prod/terraform.tfvars" -auto-approve
+
 ```
 
 
 
-# 5. Docker 
 
-## 5.1. Authenticates local Docker client with Azure Container Registry (ACR)
-az acr login --name figfigacrdev
-Allows to push and pull Docker images securely from that ACR.
-
-
-
-## 5.2. Docker build 
-
-```cmd
-REM dev
-docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:dev .
-docker push figfigacrdev.azurecr.io/figfig-app:dev
-docker run --env-file .env.dev figfigacrdev.azurecr.io/figfig-app:dev
-
-REM prod
-docker build -f docker/Dockerfile --build-arg ENV=prod -t figfigacrprod.azurecr.io/figfig-app:prod .
-docker push figfigacrprod.azurecr.io/figfig-app:prod
-docker run --env-file .env.prod figfigacrprod.azurecr.io/figfig-app:prod
-```
-
-# 6. Azure Useful commands 
+# 5. Azure Useful commands 
 
 ```cmd
 REM AZURE SUBSCRIPTION 
@@ -163,7 +158,7 @@ az ad app credential reset --id $APP_ID --append --display-name "GitHub Actions 
 
 
 
-# 7. Feature Matrix: ACI, AKS, and App Services
+# 6. Feature Matrix: ACI, AKS, and App Services
 | Feature                 | ACI                          | AKS                          | App Services for Containers       |
 |-------------------------|------------------------------|-------------------------------|-----------------------------------|
 | Management overhead     | Very Low                     | High                          | Low                               |
