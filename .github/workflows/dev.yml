@@ -32,7 +32,8 @@ jobs:
         working-directory: terraform
         run: |
           terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars"
+          terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/dev/terraform.tfvars" 
+          terraform apply -target="module.acr" -var-file="envs/dev/terraform.tfvars" -auto-approve
 
       - name: Docker Login to ACR using Azure CLI
         run: |
@@ -40,8 +41,19 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:dev .
-
+          docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:latest .
       - name: Push Docker Image
         run: |
           docker push figfigacrdev.azurecr.io/figfig-app:dev
+
+      - name: Create DB, Service Bus, Key Vault
+        run: |
+          terraform apply -target="module.sql" -var-file="envs/dev/terraform.tfvars" -auto-approve
+          terraform apply -target="module.servicebus" -var-file="envs/dev/terraform.tfvars" -auto-approve
+          terraform apply -target="module.keyvault" -var-file="envs/dev/terraform.tfvars" -auto-approve
+
+      - name: deploy container group
+        run: |
+          terraform apply -target="module.containers" -var-file="envs/dev/terraform.tfvars" -auto-approve
+
+

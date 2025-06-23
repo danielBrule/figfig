@@ -111,13 +111,7 @@ terraform apply -target="module.acr" -var-file="envs/dev/terraform.tfvars" -auto
 az acr login --name figfigacrdev
 docker build -f docker/Dockerfile --build-arg ENV=dev -t figfigacrdev.azurecr.io/figfig-app:latest .
 docker push figfigacrdev.azurecr.io/figfig-app:latest
-terraform apply -target="module.sql" -var-file="envs/dev/terraform.tfvars" -auto-approve
-terraform apply -target="module.servicebus" -var-file="envs/dev/terraform.tfvars" -auto-approve
-terraform apply -target="module.keyvault" -var-file="envs/dev/terraform.tfvars" -auto-approve
-terraform apply -target="module.containers" -var-file="envs/dev/terraform.tfvars" -auto-approve
-
-
-REM PROD
+ REM PROD
 terraform init -backend-config="envs/prod/backend.tf"
 terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/prod/terraform.tfvars" 
 terraform apply -target="module.acr" -var-file="envs/prod/terraform.tfvars" -auto-approve
