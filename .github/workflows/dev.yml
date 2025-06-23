@@ -35,13 +35,8 @@ jobs:
         if: always()
         working-directory: terraform
         run: |
-            LOCK_ID=$(terraform force-unlock 2>&1 | grep -oE '[0-9a-fA-F-]{36}' || true)
-            if [ ! -z "$LOCK_ID" ]; then
-              echo "Force unlocking with ID: $LOCK_ID"
-              terraform force-unlock -force $LOCK_ID || true
-            else
-              echo "No lock ID found, skipping unlock."
-            fi
+            terraform force-unlock -force e942b945-ebf1-808e-bf6d-e1e2903add5f
+            
       - name: Import Resource Group (if needed)
         working-directory: terraform
         run: |
@@ -72,7 +67,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars" -target=module.network -target=module.acr
+          terraform apply -lock-timeout=300s -auto-approve -var-file="envs/dev/terraform.tfvars" -target=module.network -target=module.acr
 
       - name: Docker Login
         run: az acr login --name figfigacrdev
@@ -105,4 +100,4 @@ jobs:
         working-directory: terraform
         run: |
           terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -auto-approve -var-file="envs/dev/terraform.tfvars"
+          terraform apply -lock-timeout=300s -auto-approve -var-file="envs/dev/terraform.tfvars"
