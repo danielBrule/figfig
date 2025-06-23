@@ -26,10 +26,17 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Init Terraform (for import)
+        working-directory: terraform
+        run: |
+          terraform init -backend-config="envs/dev/backend.tf"
+
       - name: Import Resource Group (if needed)
         working-directory: terraform
         run: |
-          terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev || true
+          terraform state show azurerm_resource_group.main || \
+          terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev
+
 
       - name: Terraform Init & Apply Core (Network, ACR)
         working-directory: terraform
