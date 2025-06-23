@@ -34,8 +34,12 @@ jobs:
       - name: Import Resource Group (if needed)
         working-directory: terraform
         run: |
-          terraform state show azurerm_resource_group.main || \
-          terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev
+          terraform state list | grep azurerm_resource_group.main
+          if [ $? -ne 0 ]; then
+            terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev
+          else
+            echo "Resource group already managed in state."
+          fi
 
 
       - name: Terraform Init & Apply Core (Network, ACR)
