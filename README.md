@@ -62,12 +62,12 @@ This section documents the configuration of federated identity credentials in Az
 ```cmd
 REM DEV
 $json = @{
->>   name        = "github-actions-dev"
->>   issuer      = "https://token.actions.githubusercontent.com"
->>   subject     = "repo:danielBrule/figfig:ref:refs/heads/dev"
->>   description = "Federated identity for GitHub Actions"
->>   audiences   = @("api://AzureADTokenExchange")
->> } | ConvertTo-Json -Depth 3
+   name        = "github-actions-dev"
+   issuer      = "https://token.actions.githubusercontent.com"
+   subject     = "repo:danielBrule/figfig:ref:refs/heads/dev"
+   description = "Federated identity for GitHub Actions"
+   audiences   = @("api://AzureADTokenExchange")
+ } | ConvertTo-Json -Depth 3
 REM # Save to a file
 $json | Out-File -Encoding utf8 federated.json
 
