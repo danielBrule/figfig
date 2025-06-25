@@ -23,7 +23,7 @@ cf. `create_tf_backend.ps1`
 ## 2.2. Create service principal 
 Azure CLI command that creates a service principal for use with role-based access control (RBAC) in Azure
 ```cmd
-az ad sp create-for-rbac --name figscraper_sp --role Contributor --scopes /subscriptions/051a6d90-968b-4010-896c-8bdb26a892d0
+az ad sp create-for-rbac --name figscraper_sp --role Owner --scopes /subscriptions/051a6d90-968b-4010-896c-8bdb26a892d0
 REM Return
 REM * AppId: The client ID of the service principal
 REM * Password: The client secret (used like a password)
@@ -156,9 +156,87 @@ az ad app credential reset --id $APP_ID --append --display-name "GitHub Actions 
 
 ```
 
+# 6. Env files 
+## 6.1. Root
+### 6.1.2. .env.dev
+```cmd
+# App settings
+ENV=dev
+DEBUG=True
+PORT=8000
 
 
-# 6. Feature Matrix: ACI, AKS, and App Services
+DB_SERVER=figscraper-sql-dev.database.windows.net
+DB_NAME=figscraper-db-dev
+DB_USER=sqladminuser
+DB_PASSWORD=Th1s1sAPassw0rd
+DB_DRIVER=ODBC Driver 17 for SQL Server
+
+# ACR / Image name
+DOCKER_IMAGE_NAME=figfigacr.azurecr.io/figfig-app:v1
+PYTHONPATH=.
+
+LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
+LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
+
+KEY_VAULT_NAME=figfig-key-vault-dev
+
+AZURE_CLIENT_ID=<XXX>
+AZURE_TENANT_ID=<XXX>
+AZURE_CLIENT_SECRET=<XXX>
+```
+
+### 6.1.2. .env.prod
+
+# App settings
+```cmd
+ENV=prod
+DEBUG=True
+PORT=8000
+
+
+DB_SERVER=figscraper-sql-prod.database.windows.net
+DB_NAME=figscraper-db-prod
+DB_USER=sqladminuser
+DB_PASSWORD=Th1s1sAPassw0rd
+DB_DRIVER=ODBC Driver 17 for SQL Server
+
+# ACR / Image name
+DOCKER_IMAGE_NAME=figfigacr.azurecr.io/figfig-app:v1
+PYTHONPATH=.
+
+LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
+LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
+
+KEY_VAULT_NAME=figfig-key-vault-prod
+
+AZURE_CLIENT_ID=<XXX>
+AZURE_TENANT_ID=<XXX>
+AZURE_CLIENT_SECRET=<XXX>
+```
+
+## 6.2. terraform
+### 6.2.2. terraform/envs/dev/terraform.tfvars
+```cmd
+env = "dev"
+sql_password = "<XXX>"
+keyvault_name = "figfig-key-vault-dev"
+subscription_id = "<XXX>"
+client_id = "<XXX>"
+tenant_id = "<XXX>"
+client_secret ="<XXX>"
+```
+### 6.2.2. terraform/envs/prod/terraform.tfvars
+```cmd
+env = "prod"
+sql_password = "<XXX>"
+keyvault_name = "figfig-key-vault-prod"
+subscription_id = "<XXX>"
+client_id = "<XXX>"
+tenant_id = "<XXX>"
+```
+
+# 7. Feature Matrix: ACI, AKS, and App Services
 | Feature                 | ACI                          | AKS                          | App Services for Containers       |
 |-------------------------|------------------------------|-------------------------------|-----------------------------------|
 | Management overhead     | Very Low                     | High                          | Low                               |

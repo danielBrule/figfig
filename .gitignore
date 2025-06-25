@@ -18,12 +18,16 @@ htmlcov/
 
 .terraform/
 
-terraform/terraform.tfvars
+terraform/envs/dev/terraform.tfvars
+terraform/envs/prod/terraform.tfvars
 src/terraform.tfstate
+terraform.tfvars
 
 terraform/.terraform.lock.hcl
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 
 .env
+.env.dev
+.env.prod
 federated.json
