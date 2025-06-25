@@ -15,16 +15,16 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ENV: dev
-      LOCATION: ${{ secrets.TF_DEV_LOCATION }}
-      PROJECT_NAME: ${{ secrets.TF_DEV_PROJECT_NAME }}
-      RESOURCE_GROUP_NAME: ${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}
-      ACR_NAME: ${{ secrets.TF_DEV_ACR_NAME }}
-      IMAGE_NAME: ${{ secrets.TF_DEV_IMAGE_NAME }}
-      SQL_ADMIN: ${{ secrets.TF_DEV_SQL_ADMIN }}
-      SQL_PASSWORD: ${{ secrets.TF_DEV_SQL_PASSWORD }}
-      KEYVAULT_NAME: ${{ secrets.TF_DEV_KEYVAULT_NAME }}
       ARM_USE_OIDC: true
+      TF_VAR_env: dev
+      TF_VAR_location: ${{ secrets.TF_DEV_LOCATION }}
+      TF_VAR_project_name: ${{ secrets.TF_DEV_PROJECT_NAME }}
+      TF_VAR_resource_group_name: ${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}
+      TF_VAR_acr_name: ${{ secrets.TF_DEV_ACR_NAME }}
+      TF_VAR_image_name: ${{ secrets.TF_DEV_IMAGE_NAME }}
+      TF_VAR_sql_admin: ${{ secrets.TF_DEV_SQL_ADMIN }}
+      TF_VAR_sql_password: ${{ secrets.TF_DEV_SQL_PASSWORD }}
+      TF_VAR_keyvault_name: ${{ secrets.TF_DEV_KEYVAULT_NAME }}
 
     steps:
       - name: 🔄 Checkout repository
@@ -42,15 +42,14 @@ jobs:
         with:
           terraform_version: 1.6.6
 
-      - name: 🚀 Init Terraform
+      - name: 🚀 Terraform Init
         working-directory: terraform
         run: terraform init -backend-config="envs/dev/backend.tf"
 
-      - name: ⚙️ Terraform Apply Core Infra (ACR, Network)
+      - name: ⚙️ Terraform Apply Core (Network, ACR)
         working-directory: terraform
         run: |
-          terraform apply -lock-timeout=300s -auto-approve -var-file="envs/dev/terraform.tfvars" \
-            -target=module.network -target=module.acr
+          terraform apply -auto-approve -lock-timeout=300s -target=module.network -target=module.acr
 
       - name: 🔑 Docker Login to ACR
         run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}
@@ -68,16 +67,16 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ENV: dev
-      LOCATION: ${{ secrets.TF_DEV_LOCATION }}
-      PROJECT_NAME: ${{ secrets.TF_DEV_PROJECT_NAME }}
-      RESOURCE_GROUP_NAME: ${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}
-      ACR_NAME: ${{ secrets.TF_DEV_ACR_NAME }}
-      IMAGE_NAME: ${{ secrets.TF_DEV_IMAGE_NAME }}
-      SQL_ADMIN: ${{ secrets.TF_DEV_SQL_ADMIN }}
-      SQL_PASSWORD: ${{ secrets.TF_DEV_SQL_PASSWORD }}
-      KEYVAULT_NAME: ${{ secrets.TF_DEV_KEYVAULT_NAME }}
       ARM_USE_OIDC: true
+      TF_VAR_env: dev
+      TF_VAR_location: ${{ secrets.TF_DEV_LOCATION }}
+      TF_VAR_project_name: ${{ secrets.TF_DEV_PROJECT_NAME }}
+      TF_VAR_resource_group_name: ${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}
+      TF_VAR_acr_name: ${{ secrets.TF_DEV_ACR_NAME }}
+      TF_VAR_image_name: ${{ secrets.TF_DEV_IMAGE_NAME }}
+      TF_VAR_sql_admin: ${{ secrets.TF_DEV_SQL_ADMIN }}
+      TF_VAR_sql_password: ${{ secrets.TF_DEV_SQL_PASSWORD }}
+      TF_VAR_keyvault_name: ${{ secrets.TF_DEV_KEYVAULT_NAME }}
 
     steps:
       - name: 🔄 Checkout repository
@@ -97,4 +96,4 @@ jobs:
         working-directory: terraform
         run: |
           terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -lock-timeout=300s -auto-approve -var-file="envs/dev/terraform.tfvars"
+          terraform apply -auto-approve -lock-timeout=300s
