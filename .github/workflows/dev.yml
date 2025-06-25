@@ -46,10 +46,12 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config="envs/dev/backend.tf"
 
-      - name: ⚙️ Terraform Apply Core (Network, ACR)
+      - name: ⚙️ Terraform Apply Core (Network, ACR, RG)
         working-directory: terraform
-        run: |
-          terraform apply -auto-approve -lock-timeout=300s -target=module.network -target=module.acr
+        run: terraform apply -auto-approve -lock-timeout=300s \
+          -target=azurerm_resource_group.main \
+          -target=module.network \
+          -target=module.acr
 
       - name: 🔑 Docker Login to ACR
         run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}
@@ -92,8 +94,23 @@ jobs:
       - name: 🧱 Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: 🚀 Terraform Init
+        working-directory: terraform
+        run: terraform init -backend-config="envs/dev/backend.tf"
+
       - name: ⚙️ Terraform Apply Remaining Infra
         working-directory: terraform
+        run: terraform apply -auto-approve -lock-timeout=300s
+
+      - name: 🔓 Cleanup State Lock (if needed)
+        if: failure()
+        working-directory: terraform
         run: |
-          terraform init -backend-config="envs/dev/backend.tf"
-          terraform apply -auto-approve -lock-timeout=300s
+          echo "🔄 Attempting to unlock state (if locked)..."
+          LOCK_ID=$(terraform force-unlock --dry-run 2>&1 | grep -oP 'Lock ID: \K\S+') || true
+          if [ ! -z "$LOCK_ID" ]; then
+            echo "⚠️ Unlocking stuck state with ID: $LOCK_ID"
+            terraform force-unlock -force "$LOCK_ID"
+          else
+            echo "✅ No lock found."
+          fi
