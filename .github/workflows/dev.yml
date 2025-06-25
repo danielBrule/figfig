@@ -40,8 +40,12 @@ jobs:
       - name: 📦 Check Resource Group State
         working-directory: terraform
         run: |
-          terraform state list | grep azurerm_resource_group.main || \
-          terraform import -lock-timeout=60s azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
+            if ! terraform state list | grep -q azurerm_resource_group.main; then
+              echo "Resource group not in state — importing..."
+              terraform import -lock-timeout=60s azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
+            else
+              echo "Resource group already in state — skipping import"
+            fi
 
       - name: 📦 Check ACR State
         working-directory: terraform
