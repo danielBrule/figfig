@@ -105,8 +105,8 @@ Alternatively:
 ```cmd
 REM DEV
 cd terraform
-terraform destroy -auto-approve -var-file="envs/dev/terraform.tfvars"
 terraform init -backend-config="envs/dev/backend.tf"
+terraform destroy -auto-approve -var-file="envs/dev/terraform.tfvars"
 terraform apply -target="azurerm_resource_group.main" -target="module.network" -auto-approve -var-file="envs/dev/terraform.tfvars" 
 terraform apply -target="module.acr" -var-file="envs/dev/terraform.tfvars" -auto-approve
 az acr login --name figfigacrdev

@@ -39,19 +39,27 @@ jobs:
 
       - name: 📦 Check Resource Group State
         working-directory: terraform
-        run: terraform state show azurerm_resource_group.main || terraform import azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
+        run: |
+          terraform state list | grep azurerm_resource_group.main || \
+          terraform import -lock-timeout=60s azurerm_resource_group.main "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev"
 
       - name: 📦 Check ACR State
         working-directory: terraform
-        run: terraform state list | grep module.acr.azurerm_container_registry.acr || terraform import module.acr.azurerm_container_registry.acr "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.ContainerRegistry/registries/figfigacrdev"
+        run: |
+          terraform state list | grep module.acr.azurerm_container_registry.acr || \
+          terraform import -lock-timeout=60s module.acr.azurerm_container_registry.acr "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.ContainerRegistry/registries/figfigacrdev"
 
       - name: 📦 Check Virtual Network
         working-directory: terraform
-        run: terraform state show module.network.azurerm_virtual_network.vnet || terraform import module.network.azurerm_virtual_network.vnet "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev"
+        run: |
+          terraform state list | grep module.network.azurerm_virtual_network.vnet || \
+          terraform import -lock-timeout=60s module.network.azurerm_virtual_network.vnet "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev"
 
       - name: 📦 Check Subnet
         working-directory: terraform
-        run: terraform state show module.network.azurerm_subnet.public || terraform import module.network.azurerm_subnet.public "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev/subnets/public-subnet-dev"
+        run: |
+          terraform state list | grep module.network.azurerm_subnet.public || \
+          terraform import -lock-timeout=60s module.network.azurerm_subnet.public "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/FigFigRG-dev/providers/Microsoft.Network/virtualNetworks/my-vnet-dev/subnets/public-subnet-dev"
 
       - name: ⚙️ Terraform Apply Core (Network, ACR)
         working-directory: terraform
