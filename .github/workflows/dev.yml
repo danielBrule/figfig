@@ -69,13 +69,13 @@ jobs:
 #        run: terraform apply -auto-approve -lock-timeout=300s  -target="module.containers"
 
       - name: 🔑 Docker Login to ACR
-        run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}
+        run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}dev
 
       - name: 🛠 Build Docker Image
-        run: docker build -f docker/Dockerfile --build-arg ENV=dev -t ${{ secrets.TF_DEV_ACR_NAME }}.azurecr.io/figfig-app:latest .
+        run: docker build -f docker/Dockerfile --build-arg ENV=dev -t ${{ secrets.TF_DEV_ACR_NAME }}dev.azurecr.io/figfig-app:latest .
 
       - name: 📤 Push Docker Image
-        run: docker push ${{ secrets.TF_DEV_ACR_NAME }}.azurecr.io/figfig-app:latest
+        run: docker push ${{ secrets.TF_DEV_ACR_NAME }}dev.azurecr.io/figfig-app:latest
 
       - name: 🔓 Cleanup State Lock (if needed)
         if: failure()
