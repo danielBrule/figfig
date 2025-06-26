@@ -42,6 +42,11 @@ jobs:
         with:
           terraform_version: 1.6.6
 
+      - name: Test Blob Access
+        run: |
+          az storage blob list --account-name figfigtfstatedev --container-name tfstate --auth-mode login
+
+
       - name: 🚀 Terraform Init
         working-directory: terraform
         run: terraform init -backend-config="envs/dev/backend.tf"
