@@ -46,9 +46,13 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config="envs/dev/backend.tf"
 
-      - name: ⚙️ Terraform Apply Core (Network, ACR, RG)
+      - name: ⚙️ Terraform Apply Core (Network, RG)
         working-directory: terraform
-        run: terraform apply -auto-approve -lock-timeout=300s -target=azurerm_resource_group.main -target=module.network -target=module.acr
+        run: terraform apply -auto-approve -lock-timeout=300s -target="azurerm_resource_group.main" -target="module.network" 
+
+      - name: ⚙️ Terraform ACR 
+        working-directory: terraform
+        run: terraform apply -auto-approve -lock-timeout=300s  -target="module.acr"
 
       - name: 🔑 Docker Login to ACR
         run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}
