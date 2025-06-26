@@ -53,7 +53,7 @@ jobs:
 
       - name: ⚙️ Terraform Apply Core (Network, RG)
         working-directory: terraform
-        run: terraform apply -auto-approve -lock-timeout=300s -target="azurerm_resource_group.main" -target="module.network" 
+        run: terraform apply -auto-approve -lock-timeout=300s -target="azurerm_resource_group.main" -target="module.network" -lock=false
 
       - name: ⚙️ Terraform ACR 
         working-directory: terraform
