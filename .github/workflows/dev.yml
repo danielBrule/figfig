@@ -64,9 +64,9 @@ jobs:
         working-directory: terraform
         run: terraform apply -auto-approve -lock-timeout=300s  -target="module.acr"
 
-      - name: ⚙️ Terraform containers 
-        working-directory: terraform
-        run: terraform apply -auto-approve -lock-timeout=300s  -target="module.containers"
+#      - name: ⚙️ Terraform containers 
+#        working-directory: terraform
+#        run: terraform apply -auto-approve -lock-timeout=300s  -target="module.containers"
 
       - name: 🔑 Docker Login to ACR
         run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}
