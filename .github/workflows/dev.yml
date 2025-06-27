@@ -134,19 +134,27 @@ jobs:
 
       - name: 🧬 Import existing Key Vault secrets (if needed)
         working-directory: terraform
+        shell: bash
         run: |
           echo "🔍 Checking if secrets exist in Azure and importing if necessary..."
 
+          set -e
+
+          DB_SECRET="${{ secrets.TF_DEV_KEYVAULT_NAME }}/db-password"
+          SB_SECRET="${{ secrets.TF_DEV_KEYVAULT_NAME }}/servicebus-conn-string"
+
+          echo "Importing db-password..."
           if az keyvault secret show --vault-name "${{ secrets.TF_DEV_KEYVAULT_NAME }}" --name "db-password" > /dev/null 2>&1; then
-            terraform import "module.keyvault.azurerm_key_vault_secret.sql" "${{ secrets.TF_DEV_KEYVAULT_NAME }}/db-password"
+            terraform import "module.keyvault.azurerm_key_vault_secret.sql" "$DB_SECRET"
           else
-            echo "⚠️ db-password secret not found in Azure Key Vault"
+            echo "⚠️ db-password not found in Key Vault, skipping import"
           fi
 
+          echo "Importing servicebus-conn-string..."
           if az keyvault secret show --vault-name "${{ secrets.TF_DEV_KEYVAULT_NAME }}" --name "servicebus-conn-string" > /dev/null 2>&1; then
-            terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "${{ secrets.TF_DEV_KEYVAULT_NAME }}/servicebus-conn-string"
+            terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "$SB_SECRET"
           else
-            echo "⚠️ servicebus-conn-string secret not found in Azure Key Vault"
+            echo "⚠️ servicebus-conn-string not found in Key Vault, skipping import"
           fi
 
 
