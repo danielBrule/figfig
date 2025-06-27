@@ -70,6 +70,7 @@ jobs:
 
       - name: 🔑 Docker Login to ACR
         run: az acr login --name ${{ secrets.TF_DEV_ACR_NAME }}dev
+        
 
       - name: 🛠 Build Docker Image
         run: docker build -f docker/Dockerfile --build-arg ENV=dev -t ${{ secrets.TF_DEV_ACR_NAME }}dev.azurecr.io/figfig-app:latest .
