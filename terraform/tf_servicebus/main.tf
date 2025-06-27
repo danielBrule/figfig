@@ -12,14 +12,14 @@ resource "azurerm_servicebus_queue" "queue_articlesxml" {
 
 resource "azurerm_servicebus_queue" "queue_articles" {
   name                = "queue_articles"
-  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
+  namespace_id        = azurerm_servicebus_namespace.sb.id
 
   max_size_in_megabytes = 1024
 }
 
 resource "azurerm_servicebus_queue" "queue_comments" {
   name                = "queue_comments"
-  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
+  namespace_id      = azurerm_servicebus_namespace.sb.id
 
   max_size_in_megabytes = 1024
 }
