@@ -132,6 +132,22 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config="envs/dev/backend.tf"
 
+      - name: 🧬 Import existing Key Vault secrets (if needed)
+        working-directory: terraform
+        run: |
+          echo "🔍 Checking if secrets exist in Azure and importing if necessary..."
+
+          # SQL Password Secret
+          az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name db-password > /dev/null 2>&1 && \
+          terraform import module.keyvault.azurerm_key_vault_secret.sql https://${{ secrets.TF_DEV_KEYVAULT_NAME }}.vault.azure.net/secrets/db-password || \
+          echo "⚠️ db-password secret not found or already imported."
+
+          # Service Bus Secret
+          az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name servicebus-conn-string > /dev/null 2>&1 && \
+          terraform import module.keyvault.azurerm_key_vault_secret.sb_conn https://${{ secrets.TF_DEV_KEYVAULT_NAME }}.vault.azure.net/secrets/servicebus-conn-string || \
+          echo "⚠️ servicebus-conn-string secret not found or already imported."
+
+
       - name: ⚙️ Terraform Apply Remaining Infra
         working-directory: terraform
         run: terraform apply -auto-approve -lock-timeout=300s
