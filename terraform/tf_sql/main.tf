@@ -13,3 +13,18 @@ resource "azurerm_mssql_database" "db" {
   sku_name  = "Basic"
   max_size_gb = 2
 }
+
+# Optional: firewall to allow Azure services
+resource "azurerm_mssql_firewall_rule" "allow_azure_home" {
+  name             = "AllowAzure_home-${var.env}"
+  server_id        = azurerm_mssql_server.sql.id
+  start_ip_address = "80.5.197.0"
+  end_ip_address   = "80.5.197.255"
+}
+
+resource "azurerm_mssql_firewall_rule" "allow_azure_office" {
+  name             = "AllowAzure_office-${var.env}"
+  server_id        = azurerm_mssql_server.sql.id
+  start_ip_address = "212.36.188.0"
+  end_ip_address   = "212.36.188.255"
+}

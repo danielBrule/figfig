@@ -5,9 +5,23 @@ resource "azurerm_servicebus_namespace" "sb" {
   sku                 = "Standard"
 }
 
-resource "azurerm_servicebus_queue" "articlesxml" {
+resource "azurerm_servicebus_queue" "queue_articlesxml" {
   name         = "queue_articles_xml"
   namespace_id = azurerm_servicebus_namespace.sb.id
+}
+
+resource "azurerm_servicebus_queue" "queue_articles" {
+  name                = "queue_articles"
+  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
+
+  max_size_in_megabytes = 1024
+}
+
+resource "azurerm_servicebus_queue" "queue_comments" {
+  name                = "queue_comments"
+  namespace_id      = azurerm_servicebus_namespace.sb_namespace.id
+
+  max_size_in_megabytes = 1024
 }
 
 resource "azurerm_servicebus_namespace_authorization_rule" "queue_auth_rule" {

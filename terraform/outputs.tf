@@ -1,13 +1,13 @@
-output "scrap_primary_container_group_name" {
-  value = module.containers.scrap_primary_name
+output "scrap_articlesxml_container_group_name" {
+  value = module.containers.scrap_articlesxml_name
 }
 
-output "scrap_second_container_group_name" {
-  value = module.containers.scrap_second_name
+output "scrap_articles_container_group_name" {
+  value = module.containers.scrap_articles_name
 }
 
-output "scrap_third_container_group_name" {
-  value = module.containers.scrap_third_name
+output "scrap_comments_container_group_name" {
+  value = module.containers.scrap_comments_name
 }
 
 output "servicebus_connection_string" {

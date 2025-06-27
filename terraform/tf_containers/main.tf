@@ -1,5 +1,5 @@
-resource "azurerm_container_group" "scrap_primary" {
-  name                = "scrap-primary-${var.env}"
+resource "azurerm_container_group" "scrap_articlesxml" {
+  name                = "scrap-articlesxml-${var.env}"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
@@ -32,8 +32,8 @@ resource "azurerm_container_group" "scrap_primary" {
   }
 }
 
-resource "azurerm_container_group" "scrap_secondary" {
-  name                = "scrap-secondary-${var.env}"
+resource "azurerm_container_group" "scrap_articles" {
+  name                = "scrap-articles-${var.env}"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
@@ -67,8 +67,8 @@ resource "azurerm_container_group" "scrap_secondary" {
 }
 
 
-resource "azurerm_container_group" "scrap_tertiary" {
-  name                = "scrap-tertiary-${var.env}"
+resource "azurerm_container_group" "scrap_comments" {
+  name                = "scrap-comments-${var.env}"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
