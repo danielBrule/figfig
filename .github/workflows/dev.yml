@@ -137,19 +137,18 @@ jobs:
         run: |
           echo "🔍 Checking if secrets exist in Azure and importing if necessary..."
 
-          VAULT_ID=$(az keyvault show --name "${{ secrets.TF_DEV_KEYVAULT_NAME }}" --query id -o tsv)
-
           if az keyvault secret show --vault-name "${{ secrets.TF_DEV_KEYVAULT_NAME }}" --name "db-password" > /dev/null 2>&1; then
-            terraform import "module.keyvault.azurerm_key_vault_secret.sql" "$VAULT_ID/secrets/db-password"
+            terraform import "module.keyvault.azurerm_key_vault_secret.sql" "${{ secrets.TF_DEV_KEYVAULT_NAME }}/db-password"
           else
             echo "⚠️ db-password secret not found in Azure Key Vault"
           fi
 
           if az keyvault secret show --vault-name "${{ secrets.TF_DEV_KEYVAULT_NAME }}" --name "servicebus-conn-string" > /dev/null 2>&1; then
-            terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "$VAULT_ID/secrets/servicebus-conn-string"
+            terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "${{ secrets.TF_DEV_KEYVAULT_NAME }}/servicebus-conn-string"
           else
             echo "⚠️ servicebus-conn-string secret not found in Azure Key Vault"
           fi
+
 
       - name: 🔄 Refresh Terraform State
         working-directory: terraform
