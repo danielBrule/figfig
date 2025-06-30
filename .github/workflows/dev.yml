@@ -145,11 +145,12 @@ jobs:
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
 
           echo "🔎 Fetching object IDs via Azure CLI..."
-          CLIENT_OBJECT_ID=$(az ad signed-in-user show --query objectId -o tsv || echo "")
-          GITHUB_OIDC_OBJECT_ID=$(az ad sp list --filter "appId eq '${{ secrets.AZURE_CLIENT_ID }}'" --query "[0].objectId" -o tsv || echo "")
+          CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
+          CLIENT_OBJECT_ID=$(az ad sp show --id "$CLIENT_ID" --query objectId -o tsv || echo "")
+          GITHUB_OIDC_OBJECT_ID="$CLIENT_OBJECT_ID"  # If using same SP for GitHub OIDC
 
-          if [ -z "$CLIENT_OBJECT_ID" ] || [ -z "$GITHUB_OIDC_OBJECT_ID" ]; then
-            echo "❌ Failed to retrieve CLIENT_OBJECT_ID or GITHUB_OIDC_OBJECT_ID via Azure CLI"
+          if [ -z "$CLIENT_OBJECT_ID" ]; then
+            echo "❌ Failed to retrieve CLIENT_OBJECT_ID via Azure CLI"
             exit 1
           fi
 
