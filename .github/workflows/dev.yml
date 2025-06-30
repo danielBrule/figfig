@@ -136,7 +136,7 @@ jobs:
         working-directory: terraform
         shell: bash
         run: |
-          set -eu
+          set -eu 
 
           echo "🔍 Importing secrets and access policies if not already in state..."
 
