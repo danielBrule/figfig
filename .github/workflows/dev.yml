@@ -155,7 +155,9 @@ jobs:
             fi
           fi
 
-          if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then            
+          if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then     
+            echo "✅ servicebus already managed in Terraform state. Skipping import."
+          else       
             if az keyvault secret show --vault-name figfig-kv-dev --name "servicebus-conn-string" > /dev/null 2>&1; then
               DB_SECRET=$(az keyvault secret show --vault-name figfig-kv-dev --name "servicebus-conn-string" --query id --output tsv)
               terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "$DB_SECRET"
