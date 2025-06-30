@@ -141,7 +141,7 @@ jobs:
           echo "🔍 Importing secrets and access policies if not already in state..."
 
           KV_NAME="${{ secrets.TF_DEV_KEYVAULT_NAME }}"
-          RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev"
+          RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev" 
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
           UAI_NAME="figfig-aci-identity"
