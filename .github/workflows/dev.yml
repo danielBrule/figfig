@@ -143,6 +143,14 @@ jobs:
           KV_NAME="${{ secrets.TF_DEV_KEYVAULT_NAME }}"
           RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev"
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          TENANT_ID="${{ secrets.AZURE_TENANT_ID }}"
+          CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
+
+          # Get object IDs directly from Azure
+          echo "🔎 Fetching object IDs via Azure CLI..."
+          CLIENT_OBJECT_ID=$(az ad sp show --id "$CLIENT_ID" --query objectId -o tsv)
+          GITHUB_OIDC_OBJECT_ID=$(az ad sp list --filter "appId eq '$CLIENT_ID'" --query "[0].objectId" -o tsv)
+
 
           # Get object IDs
           echo "🔎 Retrieving Object IDs from Terraform context..."
