@@ -136,34 +136,39 @@ jobs:
         working-directory: terraform
         shell: bash
         run: |
-          echo "🔍 Checking if secrets exist in Azure and importing if necessary..."
-
           set -e
 
-          echo "Importing db-password..."
-          if terraform state show module.keyvault.azurerm_key_vault_secret.sql > /dev/null 2>&1; then
-            echo "✅ db-password already managed in Terraform state. Skipping import."
-          else
-            if az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name "db-password" > /dev/null 2>&1; then
-              DB_SECRET=$(az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name "db-password" --query id --output tsv)
-              terraform import "module.keyvault.azurerm_key_vault_secret.sql" "$DB_SECRET"
-            else
-              echo "⚠️ db-password not found in Key Vault, skipping import"
-            fi
-          fi
+            echo "🔍 Importing secrets and access policies if not already in state..."
 
-          if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then     
-            echo "✅ servicebus already managed in Terraform state. Skipping import."
-          else       
-            if az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name "servicebus-conn-string" > /dev/null 2>&1; then
-              DB_SECRET=$(az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name "servicebus-conn-string" --query id --output tsv)
-              terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "$DB_SECRET"
-            else
-              echo "⚠️ servicebus-conn-string not found in Key Vault, skipping import"
-            fi
-          fi
+            import_if_needed() {
+              local name=$1
+              local tf_address=$2
+              local import_id=$3
 
+              echo "▶️ Checking $name..."
+              if terraform state show "$tf_address" > /dev/null 2>&1; then
+                echo "✅ $name already in state"
+              else
+                echo "📦 Importing $name"
+                terraform import "$tf_address" "$import_id"
+              fi
+            }
 
+            # Secrets
+            SECRET1_ID=$(az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name db-password --query id -o tsv)
+            SECRET2_ID=$(az keyvault secret show --vault-name ${{ secrets.TF_DEV_KEYVAULT_NAME }} --name servicebus-conn-string --query id -o tsv)
+
+            import_if_needed "db-password secret" "module.keyvault.azurerm_key_vault_secret.sql" "$SECRET1_ID"
+            import_if_needed "servicebus-conn-string secret" "module.keyvault.azurerm_key_vault_secret.sb_conn" "$SECRET2_ID"
+
+            # Access policies
+            VAULT_NAME=${{ secrets.TF_DEV_KEYVAULT_NAME }}
+            SUB_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            RG_NAME=${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev
+
+            import_if_needed "terraform access policy" "module.keyvault.azurerm_key_vault_access_policy.terraform" "/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.KeyVault/vaults/$VAULT_NAME/objectId/${{ secrets.TF_CLIENT_OBJECT_ID }}"
+            import_if_needed "github_oidc access policy" "module.keyvault.azurerm_key_vault_access_policy.github_oidc" "/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.KeyVault/vaults/$VAULT_NAME/objectId/${{ secrets.TF_GITHUB_OIDC_OBJECT_ID }}"
+            import_if_needed "aci_identity access policy" "module.keyvault.azurerm_key_vault_access_policy.aci_identity" "/subscriptions/$SUB_ID/resourceGroups/$RG_NAME/providers/Microsoft.KeyVault/vaults/$VAULT_NAME/objectId/${{ secrets.TF_ACI_PRINCIPAL_ID }}"
 
 
       - name: 🔄 Refresh Terraform State
