@@ -220,7 +220,7 @@ AZURE_CLIENT_SECRET=<XXX>
 ```cmd
 env = "dev"
 sql_password = "<XXX>"
-keyvault_name = "figfig-key-vault-dev"
+keyvault_name = "figfig-kv-dev"
 subscription_id = "<XXX>"
 client_id = "<XXX>"
 tenant_id = "<XXX>"
@@ -230,7 +230,7 @@ client_secret ="<XXX>"
 ```cmd
 env = "prod"
 sql_password = "<XXX>"
-keyvault_name = "figfig-key-vault-prod"
+keyvault_name = "figfig-kv-prod"
 subscription_id = "<XXX>"
 client_id = "<XXX>"
 tenant_id = "<XXX>"
@@ -250,7 +250,7 @@ tenant_id = "<XXX>"
 |PYTHONPATH                 | .                 |
 |REGISTRY_PASSWORD          | TODEL??           |
 |REGISTRY_USERNAME          | TODEL??           |
-|TF_DEV_ACR_NAME            | figfigacrdev      |
+|TF_DEV_ACR_NAME            | figfigacr      |
 |TF_DEV_ENV                 | deb               |
 |TF_DEV_IMAGE_NAME          | ??                |
 |TF_DEV_KEYVAULT_NAME       | figfig-kv-dev     |
