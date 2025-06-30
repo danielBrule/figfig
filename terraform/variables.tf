@@ -27,7 +27,7 @@ variable "image_name" {
 }
 
 variable "sql_admin" {
-  default = "sqladminuser"
+  default = "sqladmin"
 }
 
 variable "sql_password" {

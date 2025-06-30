@@ -168,7 +168,7 @@ PORT=8000
 
 DB_SERVER=figfig-sql-dev.database.windows.net
 DB_NAME=figfig-db-dev-dev
-DB_USER=sqladminuser
+DB_USER=sqladmin
 DB_PASSWORD=Th1s1sAPassw0rd
 DB_DRIVER=ODBC Driver 17 for SQL Server
 
@@ -197,7 +197,7 @@ PORT=8000
 
 DB_SERVER=figscraper-sql-prod.database.windows.net
 DB_NAME=figfig-db-dev-prod
-DB_USER=sqladminuser
+DB_USER=sqladmin
 DB_PASSWORD=Th1s1sAPassw0rd
 DB_DRIVER=ODBC Driver 17 for SQL Server
 
@@ -257,7 +257,7 @@ tenant_id = "<XXX>"
 |TF_DEV_LOCATION            | uksouth           |
 |TF_DEV_PROJECT_NAME        | FigFigRG-dev      |
 |TF_DEV_RESOURCE_GROUP_NAME | FigFigRG??        |
-|TF_DEV_SQL_ADMIN           | sqladminuser      |
+|TF_DEV_SQL_ADMIN           | sqladmin      |
 |TF_DEV_SQL_PASSWORD        | up to you         |
 
 
