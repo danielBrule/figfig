@@ -16,7 +16,7 @@ resource "azurerm_key_vault" "main" {
   access_policy {
     tenant_id = var.client_config.tenant_id
     object_id = var.github_oidc.object_id
-    secret_permissions = ["Get", "List"]
+    secret_permissions = ["Get", "List", "Set", "Delete", "Purge", "Recover", "Backup", "Restore"]
   }
 }
 
