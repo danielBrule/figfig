@@ -155,12 +155,16 @@ jobs:
             fi
           fi
 
-          #echo "Importing servicebus-conn-string..."
-          #if az keyvault secret show --vault-name figfig-kv-dev --name "servicebus-conn-string" > /dev/null 2>&1; then
-          #  terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "$SB_SECRET"
-          #else
-          #  echo "⚠️ servicebus-conn-string not found in Key Vault, skipping import"
-          #fi
+          if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then            
+            if az keyvault secret show --vault-name figfig-kv-dev --name "servicebus-conn-string" > /dev/null 2>&1; then
+              DB_SECRET=$(az keyvault secret show --vault-name figfig-kv-dev --name "servicebus-conn-string" --query id --output tsv)
+              terraform import "module.keyvault.azurerm_key_vault_secret.sb_conn" "$DB_SECRET"
+            else
+              echo "⚠️ servicebus-conn-string not found in Key Vault, skipping import"
+            fi
+          fi
+
+
 
 
       - name: 🔄 Refresh Terraform State
