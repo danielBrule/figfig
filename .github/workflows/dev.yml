@@ -136,22 +136,29 @@ jobs:
         working-directory: terraform
         shell: bash
         run: |
-          set -e
+          set -eu
 
           echo "🔍 Importing secrets and access policies if not already in state..."
 
           KV_NAME="${{ secrets.TF_DEV_KEYVAULT_NAME }}"
           RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev"
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          TENANT_ID="${{ secrets.AZURE_TENANT_ID }}"
           CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
 
-          # Get object IDs directly from Azure 
           echo "🔎 Fetching object IDs via Azure CLI..."
-          CLIENT_OBJECT_ID=$(az ad sp show --id "$CLIENT_ID" --query objectId -o tsv)
-          GITHUB_OIDC_OBJECT_ID=$(az ad sp list --filter "appId eq '$CLIENT_ID'" --query "[0].objectId" -o tsv)
 
-          ### Import db-password secret
+          CLIENT_OBJECT_ID=$(az ad sp show --id "$CLIENT_ID" --query objectId -o tsv)
+          GITHUB_OIDC_OBJECT_ID=$(az ad sp list --display-name "GitHub" --query "[0].objectId" -o tsv || echo "")
+
+          if [[ -z "$CLIENT_OBJECT_ID" ]]; then
+            echo "❌ Failed to retrieve CLIENT_OBJECT_ID from Azure CLI"
+            exit 1
+          fi
+
+          if [[ -z "$GITHUB_OIDC_OBJECT_ID" ]]; then
+            echo "⚠️ Could not find GitHub OIDC SP object ID — skipping import"
+          fi
+
           echo "▶️ Checking db-password secret..."
           if terraform state show module.keyvault.azurerm_key_vault_secret.sql > /dev/null 2>&1; then
             echo "✅ db-password already managed."
@@ -161,7 +168,6 @@ jobs:
             terraform import module.keyvault.azurerm_key_vault_secret.sql "$DB_SECRET_ID"
           fi
 
-          ### Import servicebus-conn-string secret
           echo "▶️ Checking servicebus-conn-string secret..."
           if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then
             echo "✅ servicebus-conn-string already managed."
@@ -171,7 +177,6 @@ jobs:
             terraform import module.keyvault.azurerm_key_vault_secret.sb_conn "$SB_SECRET_ID"
           fi
 
-          ### Import Terraform SP access policy
           echo "▶️ Checking Terraform access policy..."
           if terraform state show module.keyvault.azurerm_key_vault_access_policy.terraform > /dev/null 2>&1; then
             echo "✅ Terraform access policy already managed."
@@ -181,15 +186,17 @@ jobs:
               "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${CLIENT_OBJECT_ID}"
           fi
 
-          ### Import GitHub OIDC access policy
-          echo "▶️ Checking GitHub OIDC access policy..."
-          if terraform state show module.keyvault.azurerm_key_vault_access_policy.github_oidc > /dev/null 2>&1; then
-            echo "✅ GitHub OIDC access policy already managed."
-          else
-            echo "📦 Importing GitHub OIDC access policy"
-            terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
-              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
+          if [[ -n "$GITHUB_OIDC_OBJECT_ID" ]]; then
+            echo "▶️ Checking GitHub OIDC access policy..."
+            if terraform state show module.keyvault.azurerm_key_vault_access_policy.github_oidc > /dev/null 2>&1; then
+              echo "✅ GitHub OIDC access policy already managed."
+            else
+              echo "📦 Importing GitHub OIDC access policy"
+              terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
+                "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
+            fi
           fi
+
 
 
       - name: 🔄 Refresh Terraform State
