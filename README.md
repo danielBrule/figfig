@@ -236,6 +236,32 @@ client_id = "<XXX>"
 tenant_id = "<XXX>"
 ```
 
+# 6. Github actions secrets 
+|Key                        |value|
+|---------------------------|-------------------|
+|AZURE_CLIENT_ID            | cf 2.2.           |
+|AZURE_CLIENT_SECRET        | cf 2.2.           |
+|AZURE_SUBSCRIPTION_ID      | cf 5.             |
+|AZURE_TENANT_ID            | cf 2.2.           |
+|DB_DRIVER                  | ODBC Driver 17 for SQL Server                  |
+|KEY_VAULT_NAME             | TODEL??           |
+|LOG_DATETIME_FORMAT        | "%Y-%m-%d_%H"     |
+|LOG_FORMAT                 | "%(asctime)s - %(levelname)s - %(message)s"                  |
+|PYTHONPATH                 | .                 |
+|REGISTRY_PASSWORD          | TODEL??           |
+|REGISTRY_USERNAME          | TODEL??           |
+|TF_DEV_ACR_NAME            | figfigacrdev      |
+|TF_DEV_ENV                 | deb               |
+|TF_DEV_IMAGE_NAME          | ??                |
+|TF_DEV_KEYVAULT_NAME       | figfig-kv-dev     |
+|TF_DEV_LOCATION            | uksouth           |
+|TF_DEV_PROJECT_NAME        | FigFigRG-dev      |
+|TF_DEV_RESOURCE_GROUP_NAME | FigFigRG??        |
+|TF_DEV_SQL_ADMIN           | sqladminuser      |
+|TF_DEV_SQL_PASSWORD        | up to you         |
+
+
+
 # 7. Feature Matrix: ACI, AKS, and App Services
 | Feature                 | ACI                          | AKS                          | App Services for Containers       |
 |-------------------------|------------------------------|-------------------------------|-----------------------------------|
