@@ -63,8 +63,3 @@ variable "keyvault_id" {
   sensitive   = true
 }
 
-variable "tenant_id" {
-  description = "Tenant ID for Key Vault access"
-  type        = string
-  sensitive   = true
-}
