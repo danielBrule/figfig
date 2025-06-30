@@ -14,3 +14,10 @@ output "servicebus_connection_string" {
   value = module.servicebus.primary_connection_string
   sensitive = true
 }
+output "client_object_id" {
+  value = data.azurerm_client_config.current.object_id
+}
+
+output "github_oidc_object_id" {
+  value = data.azuread_service_principal.github_oidc.object_id
+}
