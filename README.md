@@ -166,8 +166,8 @@ DEBUG=True
 PORT=8000
 
 
-DB_SERVER=figscraper-sql-dev.database.windows.net
-DB_NAME=figscraper-db-dev
+DB_SERVER=figfig-sql-dev.database.windows.net
+DB_NAME=figfig-db-dev-dev
 DB_USER=sqladminuser
 DB_PASSWORD=Th1s1sAPassw0rd
 DB_DRIVER=ODBC Driver 17 for SQL Server
@@ -196,7 +196,7 @@ PORT=8000
 
 
 DB_SERVER=figscraper-sql-prod.database.windows.net
-DB_NAME=figscraper-db-prod
+DB_NAME=figfig-db-dev-prod
 DB_USER=sqladminuser
 DB_PASSWORD=Th1s1sAPassw0rd
 DB_DRIVER=ODBC Driver 17 for SQL Server
