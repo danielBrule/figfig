@@ -72,7 +72,7 @@ module "keyvault" {
   sql_password        = var.sql_password
   servicebus_conn     = module.servicebus.primary_connection_string
   container_uai_principal_id = module.containers.aci_identity_principal_id
-
+  tenant_id           = var.tenant_id
 }
 
 module "containers" {
