@@ -14,3 +14,7 @@ output "scrap_comments_name" {
 output "aci_identity_principal_id" {
   value = azurerm_user_assigned_identity.aci_identity.principal_id
 }
+
+output "container_uai_principal_id" {
+  value = azurerm_user_assigned_identity.aci_identity.principal_id
+}
