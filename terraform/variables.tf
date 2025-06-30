@@ -57,3 +57,14 @@ variable "subscription_id" {
   sensitive   = true
 }
 
+variable "keyvault_id" {
+  description = "ID of the Azure Key Vault"
+  type        = string
+  sensitive   = true
+}
+
+variable "tenant_id" {
+  description = "Tenant ID for Key Vault access"
+  type        = string
+  sensitive   = true
+}

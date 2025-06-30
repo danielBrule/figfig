@@ -1,3 +1,10 @@
+resource "azurerm_user_assigned_identity" "aci_identity" {
+  name                = "figfig-aci-identity"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+}
+
+
 resource "azurerm_container_group" "scrap_articlesxml" {
   name                = "scrap-articlesxml-${var.env}"
   location            = var.location
@@ -7,6 +14,10 @@ resource "azurerm_container_group" "scrap_articlesxml" {
 
   ip_address_type = "Public"
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
+  }
 
   container {
     name   = "scraper"
@@ -15,8 +26,7 @@ resource "azurerm_container_group" "scrap_articlesxml" {
     memory = "1.5"
 
     secure_environment_variables = {
-      DB_PASSWORD          = var.sql_password
-      SERVICE_BUS_CONN_STR = var.servicebus_conn
+      APP_ENV = var.env
     }
 
     ports {
@@ -41,7 +51,10 @@ resource "azurerm_container_group" "scrap_articles" {
 
   ip_address_type = "Public"
 
-
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
+  }
   container {
     name   = "scraper"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
@@ -49,8 +62,7 @@ resource "azurerm_container_group" "scrap_articles" {
     memory = "1.5"
 
     secure_environment_variables = {
-      DB_PASSWORD          = var.sql_password
-      SERVICE_BUS_CONN_STR = var.servicebus_conn
+      APP_ENV = var.env
     }
 
     ports {
@@ -76,7 +88,10 @@ resource "azurerm_container_group" "scrap_comments" {
 
   ip_address_type = "Public"
 
-
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
+  }
   container {
     name   = "scraper"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
@@ -84,8 +99,7 @@ resource "azurerm_container_group" "scrap_comments" {
     memory = "1.5"
 
     secure_environment_variables = {
-      DB_PASSWORD          = var.sql_password
-      SERVICE_BUS_CONN_STR = var.servicebus_conn
+      APP_ENV = var.env
     }
 
     ports {

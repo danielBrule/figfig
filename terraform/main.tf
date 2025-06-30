@@ -71,6 +71,8 @@ module "keyvault" {
   github_oidc         = data.azuread_service_principal.github_oidc
   sql_password        = var.sql_password
   servicebus_conn     = module.servicebus.primary_connection_string
+  container_uai_principal_id = module.containers.aci_identity_principal_id
+
 }
 
 module "containers" {
