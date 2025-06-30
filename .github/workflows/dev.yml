@@ -91,47 +91,6 @@ jobs:
             echo "✅ No lock found."
           fi
 
-  deploy-infra:
-    runs-on: ubuntu-latest
-    needs: build-image
-    env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_USE_OIDC: true
-      TF_VAR_USE_OIDC: true
-      TF_VAR_client_id: ${{ secrets.AZURE_CLIENT_ID }}
-      TF_VAR_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-      TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      TF_VAR_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      TF_VAR_env: dev
-      TF_VAR_location: ${{ secrets.TF_DEV_LOCATION }}
-      TF_VAR_project_name: ${{ secrets.TF_DEV_PROJECT_NAME }}
-      TF_VAR_resource_group_name: ${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}
-      TF_VAR_acr_name: ${{ secrets.TF_DEV_ACR_NAME }}
-      TF_VAR_image_name: ${{ secrets.TF_DEV_IMAGE_NAME }}
-      TF_VAR_sql_admin: ${{ secrets.TF_DEV_SQL_ADMIN }}
-      TF_VAR_sql_password: ${{ secrets.TF_DEV_SQL_PASSWORD }}
-      TF_VAR_keyvault_name: ${{ secrets.TF_DEV_KEYVAULT_NAME }}
-
-    steps:
-      - name: 🔄 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 🔐 Azure Login with OIDC
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: 🧱 Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: 🚀 Terraform Init
-        working-directory: terraform
-        run: terraform init -backend-config="envs/dev/backend.tf"
-
       - name: 🧬 Import existing Key Vault secrets and policies (if needed)
         working-directory: terraform
         shell: bash
@@ -143,22 +102,17 @@ jobs:
           KV_NAME="${{ secrets.TF_DEV_KEYVAULT_NAME }}"
           RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev"
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
 
           echo "🔎 Fetching object IDs via Azure CLI..."
+          CLIENT_OBJECT_ID=$(az ad signed-in-user show --query objectId -o tsv || echo "")
+          GITHUB_OIDC_OBJECT_ID=$(az ad sp list --filter "appId eq '${{ secrets.AZURE_CLIENT_ID }}'" --query "[0].objectId" -o tsv || echo "")
 
-          CLIENT_OBJECT_ID=$(az ad sp show --id "$CLIENT_ID" --query objectId -o tsv)
-          GITHUB_OIDC_OBJECT_ID=$(az ad sp list --display-name "GitHub" --query "[0].objectId" -o tsv || echo "")
-
-          if [[ -z "$CLIENT_OBJECT_ID" ]]; then
-            echo "❌ Failed to retrieve CLIENT_OBJECT_ID from Azure CLI"
+          if [ -z "$CLIENT_OBJECT_ID" ] || [ -z "$GITHUB_OIDC_OBJECT_ID" ]; then
+            echo "❌ Failed to retrieve CLIENT_OBJECT_ID or GITHUB_OIDC_OBJECT_ID via Azure CLI"
             exit 1
           fi
 
-          if [[ -z "$GITHUB_OIDC_OBJECT_ID" ]]; then
-            echo "⚠️ Could not find GitHub OIDC SP object ID — skipping import"
-          fi
-
+          # db-password
           echo "▶️ Checking db-password secret..."
           if terraform state show module.keyvault.azurerm_key_vault_secret.sql > /dev/null 2>&1; then
             echo "✅ db-password already managed."
@@ -168,6 +122,7 @@ jobs:
             terraform import module.keyvault.azurerm_key_vault_secret.sql "$DB_SECRET_ID"
           fi
 
+          # servicebus
           echo "▶️ Checking servicebus-conn-string secret..."
           if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then
             echo "✅ servicebus-conn-string already managed."
@@ -177,6 +132,7 @@ jobs:
             terraform import module.keyvault.azurerm_key_vault_secret.sb_conn "$SB_SECRET_ID"
           fi
 
+          # Terraform access policy
           echo "▶️ Checking Terraform access policy..."
           if terraform state show module.keyvault.azurerm_key_vault_access_policy.terraform > /dev/null 2>&1; then
             echo "✅ Terraform access policy already managed."
@@ -186,15 +142,14 @@ jobs:
               "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${CLIENT_OBJECT_ID}"
           fi
 
-          if [[ -n "$GITHUB_OIDC_OBJECT_ID" ]]; then
-            echo "▶️ Checking GitHub OIDC access policy..."
-            if terraform state show module.keyvault.azurerm_key_vault_access_policy.github_oidc > /dev/null 2>&1; then
-              echo "✅ GitHub OIDC access policy already managed."
-            else
-              echo "📦 Importing GitHub OIDC access policy"
-              terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
-                "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
-            fi
+          # GitHub OIDC access policy
+          echo "▶️ Checking GitHub OIDC access policy..."
+          if terraform state show module.keyvault.azurerm_key_vault_access_policy.github_oidc > /dev/null 2>&1; then
+            echo "✅ GitHub OIDC access policy already managed."
+          else
+            echo "📦 Importing GitHub OIDC access policy"
+            terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
+              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
           fi
 
 
