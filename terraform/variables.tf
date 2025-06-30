@@ -56,10 +56,3 @@ variable "client_secret" {
 variable "subscription_id" {
   sensitive   = true
 }
-
-variable "keyvault_id" {
-  description = "ID of the Azure Key Vault"
-  type        = string
-  sensitive   = true
-}
-
