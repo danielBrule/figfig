@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from urllib.parse import quote_plus
 
 import os 
 from azure.identity import DefaultAzureCredential
@@ -22,7 +23,7 @@ def get_engine():
         SERVER = os.getenv("DB_SERVER")
         DATABASE = os.getenv("DB_NAME")
         USERNAME = os.getenv("DB_USER")
-        PASSWORD = client.get_secret("db-password").value
+        PASSWORD = quote_plus(client.get_secret("db-password").value)
         DRIVER = os.getenv("DB_DRIVER")
 
         # SQLAlchemy connection string
