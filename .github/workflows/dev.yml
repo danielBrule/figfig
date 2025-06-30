@@ -151,12 +151,6 @@ jobs:
           CLIENT_OBJECT_ID=$(az ad sp show --id "$CLIENT_ID" --query objectId -o tsv)
           GITHUB_OIDC_OBJECT_ID=$(az ad sp list --filter "appId eq '$CLIENT_ID'" --query "[0].objectId" -o tsv)
 
-
-          # Get object IDs
-          echo "🔎 Retrieving Object IDs from Terraform context..."
-          CLIENT_OBJECT_ID=$(terraform output -raw client_object_id)
-          GITHUB_OIDC_OBJECT_ID=$(terraform output -raw github_oidc_object_id)
-
           ### Import db-password secret
           echo "▶️ Checking db-password secret..."
           if terraform state show module.keyvault.azurerm_key_vault_secret.sql > /dev/null 2>&1; then
