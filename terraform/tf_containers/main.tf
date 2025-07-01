@@ -20,14 +20,14 @@ resource "azurerm_container_group" "scrap_dailyurl" {
   }
 
   container {
-    name   = "scraper_dailyurl"
+    name   = "scraper-dailyurl"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
     cpu    = "1"
     memory = "1.5"
 
     secure_environment_variables = {
       APP_ENV = var.env
-      SCRAPER = "scraper_dailyurl"
+      SCRAPER = "scraper-dailyurl"
     }
 
     ports {
@@ -57,14 +57,14 @@ resource "azurerm_container_group" "scrap_articles_primary_info" {
     identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
   }
   container {
-    name   = "scraper_articles_primary_info"
+    name   = "scraper-articles-primary-info"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
     cpu    = "1"
     memory = "1.5"
 
     secure_environment_variables = {
       APP_ENV = var.env
-      SCRAPER = "scraper_articles_primary_info"
+      SCRAPER = "scraper-articles-primary-info"
     }
 
     ports {
@@ -94,14 +94,14 @@ resource "azurerm_container_group" "scrap_articles_secondary_info" {
     identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
   }
   container {
-    name   = "scraper_articles_secondary_info"
+    name   = "scraper-articles-secondary-info"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
     cpu    = "1"
     memory = "1.5"
 
     secure_environment_variables = {
       APP_ENV = var.env
-      SCRAPER = "scraper_articles_secondary_info"
+      SCRAPER = "scraper-articles-secondary-info"
     }
 
     ports {
@@ -131,14 +131,14 @@ resource "azurerm_container_group" "scrap_comments" {
     identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
   }
   container {
-    name   = "scraper_comments"
+    name   = "scraper-comments"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
     cpu    = "1"
     memory = "1.5"
 
     secure_environment_variables = {
       APP_ENV = var.env
-      SCRAPER = "scraper_comments"
+      SCRAPER = "scraper-comments"
     }
 
     ports {
