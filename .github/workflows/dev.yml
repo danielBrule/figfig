@@ -136,7 +136,7 @@ jobs:
         working-directory: terraform
         shell: bash
         run: |
-         set -eu
+          set -eu
 
           echo "🔍 Importing secrets and access policies if not already in state..."
 
@@ -149,37 +149,62 @@ jobs:
           echo "🔎 Fetching object IDs via Azure CLI + Microsoft Graph..."
 
           CLIENT_OBJECT_ID=$(az rest --method GET \
-            --uri "https://graph.microsoft.com/v1.0/servicePrincipals?\$filter=appId eq='${CLIENT_ID}'" \
+            --uri "https://graph.microsoft.com/v1.0/servicePrincipals?\$filter=appId eq \"${CLIENT_ID}\"" \
             --query "value[0].id" -o tsv || echo "")
+          
+          if [ -z "$CLIENT_OBJECT_ID" ]; then
+            echo "❌ Failed to retrieve CLIENT_OBJECT_ID (OIDC SP). Continuing without it."
+          else
+            echo "✅ CLIENT_OBJECT_ID: $CLIENT_OBJECT_ID"
+          fi
 
-          echo "✅ CLIENT_OBJECT_ID: $CLIENT_OBJECT_ID"
           GITHUB_OIDC_OBJECT_ID="$CLIENT_OBJECT_ID"
 
+          # Optional: fetch ACI identity
           UAI_OBJECT_ID=$(az identity show --name "$UAI_NAME" --resource-group "$RG_NAME" --query principalId -o tsv || echo "")
-          echo "✅ UAI_OBJECT_ID: $UAI_OBJECT_ID"
+          if [ -z "$UAI_OBJECT_ID" ]; then
+            echo "⚠️ ACI identity not found. Skipping import for ACI policy."
+          else
+            echo "✅ UAI_OBJECT_ID: $UAI_OBJECT_ID"
+          fi
 
+          # Import db-password secret
           echo "📦 Importing db-password secret"
-          DB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "db-password" --query id -o tsv)
-          terraform import module.keyvault.azurerm_key_vault_secret.sql "$DB_SECRET_ID" || echo "🔁 Already imported."
+          DB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "db-password" --query id -o tsv || echo "")
+          if [ -n "$DB_SECRET_ID" ]; then
+            terraform import module.keyvault.azurerm_key_vault_secret.sql "$DB_SECRET_ID" || echo "🔁 Already imported."
+          else
+            echo "❌ db-password not found in Key Vault"
+          fi
 
+          # Import servicebus connection string
           echo "📦 Importing servicebus-conn-string secret"
-          SB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "servicebus-conn-string" --query id -o tsv)
-          terraform import module.keyvault.azurerm_key_vault_secret.sb_conn "$SB_SECRET_ID" || echo "🔁 Already imported."
+          SB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "servicebus-conn-string" --query id -o tsv || echo "")
+          if [ -n "$SB_SECRET_ID" ]; then
+            terraform import module.keyvault.azurerm_key_vault_secret.sb_conn "$SB_SECRET_ID" || echo "🔁 Already imported."
+          else
+            echo "❌ servicebus-conn-string not found in Key Vault"
+          fi
 
-          echo "📦 Importing Terraform SP access policy"
-          terraform import module.keyvault.azurerm_key_vault_access_policy.terraform \
-            "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${CLIENT_OBJECT_ID}" || echo "🔁 Already imported."
+          # Import GitHub OIDC access policy
+          if [ -n "$GITHUB_OIDC_OBJECT_ID" ]; then
+            echo "📦 Importing GitHub OIDC access policy"
+            terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
+              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}" || echo "🔁 Already imported."
+          fi
 
-          echo "📦 Importing GitHub OIDC access policy"
-          terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
-            "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}" || echo "🔁 Already imported."
+          # Import Terraform SP access policy
+          if [ -n "$CLIENT_OBJECT_ID" ]; then
+            echo "📦 Importing Terraform access policy"
+            terraform import module.keyvault.azurerm_key_vault_access_policy.terraform \
+              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${CLIENT_OBJECT_ID}" || echo "🔁 Already imported."
+          fi
 
+          # Import ACI access policy
           if [ -n "$UAI_OBJECT_ID" ]; then
             echo "📦 Importing ACI identity access policy"
             terraform import module.keyvault.azurerm_key_vault_access_policy.aci_identity \
               "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${UAI_OBJECT_ID}" || echo "🔁 Already imported."
-          else
-            echo "⚠️ ACI identity not found, skipping..."
           fi
 
 
