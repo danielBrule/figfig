@@ -53,11 +53,12 @@ jobs:
 
       - name: ⚙️ Terraform Apply Core (RG, Network, KeyVault, Identity)
         working-directory: terraform
-        run: terraform apply -auto-approve -lock-timeout=300s \
-          -target="azurerm_resource_group.main" \
-          -target="module.network" \
-          -target="module.keyvault" \
-          -target="module.identity"
+        run: |
+          terraform apply -auto-approve -lock-timeout=300s \
+            -target="azurerm_resource_group.main" \
+            -target="module.network" \
+            -target="module.keyvault" \
+            -target="module.identity"
 
   import-secrets:
     runs-on: ubuntu-latest
