@@ -136,12 +136,12 @@ jobs:
         working-directory: terraform
         shell: bash
         run: |
-          set -eu 
+         set -eu
 
           echo "🔍 Importing secrets and access policies if not already in state..."
 
           KV_NAME="${{ secrets.TF_DEV_KEYVAULT_NAME }}"
-          RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev" 
+          RG_NAME="${{ secrets.TF_DEV_RESOURCE_GROUP_NAME }}-dev"
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
           UAI_NAME="figfig-aci-identity"
@@ -149,73 +149,38 @@ jobs:
           echo "🔎 Fetching object IDs via Azure CLI + Microsoft Graph..."
 
           CLIENT_OBJECT_ID=$(az rest --method GET \
-            --uri "https://graph.microsoft.com/v1.0/servicePrincipals?\$filter=appId eq '${CLIENT_ID}'" \
+            --uri "https://graph.microsoft.com/v1.0/servicePrincipals?\$filter=appId eq='${CLIENT_ID}'" \
             --query "value[0].id" -o tsv || echo "")
-
-          if [ -z "$CLIENT_OBJECT_ID" ]; then
-            echo "❌ Failed to retrieve CLIENT_OBJECT_ID via Microsoft Graph"
-            exit 1
-          fi
 
           echo "✅ CLIENT_OBJECT_ID: $CLIENT_OBJECT_ID"
           GITHUB_OIDC_OBJECT_ID="$CLIENT_OBJECT_ID"
 
-          # Optional: ACI User Assigned Identity Object ID (for extra access policies)
           UAI_OBJECT_ID=$(az identity show --name "$UAI_NAME" --resource-group "$RG_NAME" --query principalId -o tsv || echo "")
           echo "✅ UAI_OBJECT_ID: $UAI_OBJECT_ID"
 
-          ### Import db-password secret
-          echo "▶️ Checking db-password secret..."
-          if terraform state show module.keyvault.azurerm_key_vault_secret.sql > /dev/null 2>&1; then
-            echo "✅ db-password already managed."
-          else
-            echo "📦 Importing db-password secret"
-            DB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "db-password" --query id -o tsv)
-            terraform import module.keyvault.azurerm_key_vault_secret.sql "$DB_SECRET_ID"
-          fi
+          echo "📦 Importing db-password secret"
+          DB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "db-password" --query id -o tsv)
+          terraform import module.keyvault.azurerm_key_vault_secret.sql "$DB_SECRET_ID" || echo "🔁 Already imported."
 
-          ### Import servicebus-conn-string secret
-          echo "▶️ Checking servicebus-conn-string secret..."
-          if terraform state show module.keyvault.azurerm_key_vault_secret.sb_conn > /dev/null 2>&1; then
-            echo "✅ servicebus-conn-string already managed."
-          else
-            echo "📦 Importing servicebus-conn-string secret"
-            SB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "servicebus-conn-string" --query id -o tsv)
-            terraform import module.keyvault.azurerm_key_vault_secret.sb_conn "$SB_SECRET_ID"
-          fi
+          echo "📦 Importing servicebus-conn-string secret"
+          SB_SECRET_ID=$(az keyvault secret show --vault-name "$KV_NAME" --name "servicebus-conn-string" --query id -o tsv)
+          terraform import module.keyvault.azurerm_key_vault_secret.sb_conn "$SB_SECRET_ID" || echo "🔁 Already imported."
 
-          ### Import Terraform SP access policy
-          echo "▶️ Checking Terraform access policy..."
-          if terraform state show module.keyvault.azurerm_key_vault_access_policy.terraform > /dev/null 2>&1; then
-            echo "✅ Terraform access policy already managed."
-          else
-            echo "📦 Importing Terraform access policy"
-            terraform import module.keyvault.azurerm_key_vault_access_policy.terraform \
-              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${CLIENT_OBJECT_ID}"
-          fi
+          echo "📦 Importing Terraform SP access policy"
+          terraform import module.keyvault.azurerm_key_vault_access_policy.terraform \
+            "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${CLIENT_OBJECT_ID}" || echo "🔁 Already imported."
 
-          ### Import GitHub OIDC access policy
-          echo "▶️ Checking GitHub OIDC access policy..."
-          if terraform state show module.keyvault.azurerm_key_vault_access_policy.github_oidc > /dev/null 2>&1; then
-            echo "✅ GitHub OIDC access policy already managed."
-          else
-            echo "📦 Importing GitHub OIDC access policy"
-            terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
-              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
-          fi
+          echo "📦 Importing GitHub OIDC access policy"
+          terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
+            "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}" || echo "🔁 Already imported."
 
-          ### Optional: Import ACI Identity access policy (if defined in your tf_keyvault)
-          echo "▶️ Checking ACI identity access policy..."
-          if terraform state show module.keyvault.azurerm_key_vault_access_policy.aci_identity > /dev/null 2>&1; then
-            echo "✅ ACI identity access policy already managed."
-          elif [ -n "$UAI_OBJECT_ID" ]; then
+          if [ -n "$UAI_OBJECT_ID" ]; then
             echo "📦 Importing ACI identity access policy"
             terraform import module.keyvault.azurerm_key_vault_access_policy.aci_identity \
-              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${UAI_OBJECT_ID}"
+              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${UAI_OBJECT_ID}" || echo "🔁 Already imported."
           else
             echo "⚠️ ACI identity not found, skipping..."
           fi
-
 
 
       - name: 🔄 Refresh Terraform State

@@ -1,11 +1,15 @@
-output "scrap_articlesxml_container_group_name" {
-  value = module.containers.scrap_articlesxml_name
+output "scrap_dailyurl_container_group_name" {
+  value = module.containers.scrap_dailyurl_name
 }
 
-output "scrap_articles_container_group_name" {
-  value = module.containers.scrap_articles_name
+output "scrap_articles_primary_info_container_group_name" {
+  value = module.containers.scrap_articles_primary_info_name
 }
 
+
+output "scrap_articles_secondary_info_container_group_name" {
+  value = module.containers.scrap_articles_secondary_info_name
+}
 output "scrap_comments_container_group_name" {
   value = module.containers.scrap_comments_name
 }

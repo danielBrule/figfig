@@ -52,6 +52,10 @@ def create_logger(
         except Exception as e:
             logger_.error(f"Failed to set up file logging: {e}")
 
+    logger_.info("Logger initialized")
+    logger_.info(f"\tLOG_FORMAT: {LOG_FORMAT}")
+    logger_.info(f"\tLOG_FILE_PATH: {LOG_FILE_PATH}")
+
     return logger_
 
 
@@ -69,6 +73,3 @@ logger = create_logger(
     log_level=logging.INFO
 )
 
-logger.info("Logger initialized")
-logger.info(f"LOG_FORMAT: {LOG_FORMAT}")
-logger.info(f"LOG_FILE_PATH: {LOG_FILE_PATH}")

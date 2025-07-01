@@ -8,4 +8,4 @@ else
   echo "Tables exist, skipping init."
 fi
 echo "Starting app..."
-exec python app/main.py
+python ./main.py
