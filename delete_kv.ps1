@@ -23,3 +23,30 @@ if ($deletedVaults.Count -gt 0) {
 } else {
     Write-Host "✅ No soft-deleted Key Vault found." -ForegroundColor Green
 }
+
+
+
+
+
+
+
+param (
+    [string]$KeyVaultName = "figfig-kv-dev",
+    [string]$SecretName = "db-password"
+)
+# Log in if needed
+az account show > $null 2>&1
+if ($LASTEXITCODE -ne 0) {
+    az login
+}
+
+# Check if the secret is deleted (soft-deleted)
+$deletedSecret = az keyvault secret list-deleted --vault-name $KeyVaultName --query "[?name=='$SecretName']" -o json | ConvertFrom-Json
+
+if ($deletedSecret.Count -gt 0) {
+    Write-Host "⚠️ Found deleted secret '$SecretName'. Purging..."
+    az keyvault secret purge --name $SecretName --vault-name $KeyVaultName
+    Write-Host "✅ Purged '$SecretName'"
+} else {
+    Write-Host "✅ Secret '$SecretName' is not soft-deleted."
+}
