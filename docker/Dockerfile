@@ -30,5 +30,5 @@ RUN chmod +x /entrypoint.sh
 
 # Use an explicit working directory for app run
 WORKDIR /code/src
-
+ENV PYTHONPATH=/code/src
 ENTRYPOINT ["/entrypoint.sh"]
