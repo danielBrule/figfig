@@ -43,6 +43,17 @@ resource "azurerm_key_vault_access_policy" "aci_identity" {
   secret_permissions = ["Get", "List"]
 }
 
+
+resource "azurerm_key_vault_access_policy" "container_runtime" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = var.client_config.tenant_id
+  object_id    = var.github_oidc.object_id
+  lifecycle {
+    prevent_destroy = true
+  }
+  secret_permissions = ["Get", "List"]
+}
+
 resource "azurerm_key_vault_secret" "sql" {
   name         = "db-password"
   value        = var.sql_password
