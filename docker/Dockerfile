@@ -22,7 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY docker/docker.env.${ENV} .env
 
 # Copy source code
-COPY src/ ./src/
+COPY src/ ./src/ 
 
 # Entry point setup
 COPY docker/entrypoint.sh /entrypoint.sh
