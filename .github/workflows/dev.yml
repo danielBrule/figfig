@@ -144,6 +144,7 @@ jobs:
           SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
           UAI_NAME="figfig-aci-identity"
+          
 
           echo "🔎 Fetching object IDs via Azure CLI + Microsoft Graph..."
 
@@ -222,7 +223,25 @@ jobs:
             echo "⚠️ ACI identity not found, skipping..."
           fi
 
-
+                    ### Import GitHub OIDC access policy
+          echo "▶️ Checking GitHub OIDC access policy..."
+          if terraform state show module.keyvault.azurerm_key_vault_access_policy.github_oidc > /dev/null 2>&1; then
+            echo "✅ GitHub OIDC access policy already managed."
+          else
+            echo "📦 Importing GitHub OIDC access policy"
+            terraform import module.keyvault.azurerm_key_vault_access_policy.github_oidc \
+              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
+          fi
+          
+          ### Import container access policy
+          echo "▶️ Checking container access policy..."
+          if terraform state show module.keyvault.azurerm_key_vault_access_policy.container_runtime > /dev/null 2>&1; then
+            echo "✅ container access policy already managed."
+          else
+            echo "📦 Importing container access policy"
+            terraform import module.keyvault.azurerm_key_vault_access_policy.container_runtime \
+              "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.KeyVault/vaults/${KV_NAME}/objectId/${GITHUB_OIDC_OBJECT_ID}"
+          fi
 
 
       - name: 🔄 Refresh Terraform State
