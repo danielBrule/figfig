@@ -21,6 +21,7 @@ class SitemapURLs(Base):
     last_modification = Column(DateTime, nullable=False)
     to_process = Column(Boolean, nullable=False)    
     newspaper_id = Column(Integer, ForeignKey("newspaper.id"), nullable=False)
+    insert_date = Column(DateTime, nullable=False)
     
     __table_args__ = (
         Index('ix_sitemap_urls_url', 'url'),  # Create index on `url`
@@ -36,6 +37,7 @@ class ArticlesURLs(Base):
     priority = Column(Float, nullable=False)
     source_id = Column(Integer, ForeignKey("sitemap_urls.id"), nullable=False)
     stage = Column(Integer, ForeignKey("article_stage.id"), nullable=False)    
+    insert_date = Column(DateTime, nullable=False)
     __table_args__ = (
         Index('ix_articles_urls_url', 'url'),  # Create index on `url`
     )
@@ -59,7 +61,7 @@ class Articles(Base):
     publication_date = Column(DateTime, nullable=False)
     last_modification_date = Column(DateTime, nullable=False)
     description = Column(String(1000), nullable=False)
-    
+    insert_date = Column(DateTime, nullable=False)
 
 class ArticleKeywords(Base):
     __tablename__ = "article_keywords"
@@ -78,7 +80,7 @@ class Comments(Base):
     author_type = Column(String(200), nullable=False)
     parent_id = Column(String(100), ForeignKey("comments.id"), nullable=True, default=None)
     article_id = Column(Integer, ForeignKey("articles.id"), nullable=False)
-    
+    insert_date = Column(DateTime, nullable=False)
     __table_args__ = (
         Index('comments_contributor_id', 'contributor_id'),  
     )

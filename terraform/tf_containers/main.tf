@@ -26,15 +26,15 @@ resource "azurerm_container_group" "scrap_dailyurl" {
     memory = "1.5"
 
     secure_environment_variables = {
-      APP_ENV = var.env
-      SCRAPER = "scraper-dailyurl"
-      DB_SERVER="figfig-sql-${var.env}.database.windows.net"
-      DB_NAME="figfig-db-${var.env}"
-      DB_USER="sqladmin"
-      DB_DRIVER="ODBC Driver 17 for SQL Server"
-      LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
-      LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
-      KEY_VAULT_NAME="figfig-kv-${var.env}"
+      APP_ENV             = var.env
+      SCRAPER             = "scraper-dailyurl"
+      DB_SERVER           ="figfig-sql-${var.env}.database.windows.net"
+      DB_NAME             ="figfig-db-${var.env}"
+      DB_USER             ="sqladmin"
+      DB_DRIVER           ="ODBC Driver 17 for SQL Server"
+      LOG_DATETIME_FORMAT = "%Y-%m-%d_%H"
+      LOG_FORMAT          = "%(asctime)s - %(levelname)s - %(message)s"
+      KEY_VAULT_NAME      = "figfig-kv-${var.env}"
     }
 
     ports {

@@ -9,9 +9,9 @@ from db.database import get_engine
 from db.models import ArticlesURLs, SitemapURLs
 from utils.log import logger
 from utils.constants import ArticleStageEnum, NAMESPACE
+from utils.scraper import Scraper
 
-
-class ArticlesPrimaryInfoScraper:
+class ArticlesPrimaryInfoScraper(Scraper):
     def __init__(self, sitemap_urls_id: int):
         logger.info("class ArticlesPrimaryInfoScraper.__init__")
         self._sitemap_urls_id = sitemap_urls_id
@@ -40,7 +40,8 @@ class ArticlesPrimaryInfoScraper:
                                                    last_modification=lastmod,
                                                    stage=ArticleStageEnum.UrlGathered.value,
                                                    priority=priority,
-                                                   source_id=self._sitemap_urls_id))
+                                                   source_id=self._sitemap_urls_id,
+                                                   insert_date = self._now))
             self._l_all_articles_urls.append(loc)
         logger.info(f"\t{len(self._orl_articles)} articles' urls gathered")
 

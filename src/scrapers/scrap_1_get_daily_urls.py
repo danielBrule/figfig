@@ -3,6 +3,7 @@ import requests
 import xml.etree.ElementTree as ET
 import datetime 
 import dateutil
+import os 
 from sqlalchemy import select
 from dateutil.tz import tzoffset
 from sqlalchemy.orm import Session
@@ -11,18 +12,18 @@ from db.database import get_engine
 from db.models import SitemapURLs
 from utils.constants import NewspaperEnum, NAMESPACE
 from utils.log import logger
+from utils.scraper import Scraper
     
 
 URL_ARTICLES = "https://sitemaps.lefigaro.fr/lefigaro.fr/articles.xml"
 
-class DailyURLsScraper:
+class DailyURLsScraper(Scraper):
     def __init__(self, newspaper: NewspaperEnum):
         logger.info("DailyURLsScraper.__init__")
         self._newspaper = newspaper
         self._d_urls_sitemap = {}    
         self._l_urls_sitemap_new = []
         self._l_urls_sitemap_updated = []
-        self._now = datetime.datetime.now(datetime.timezone.utc)
 
 
     def _get_daily_urls(self):
@@ -55,28 +56,33 @@ class DailyURLsScraper:
                 self._l_urls_sitemap_new.append(SitemapURLs(url= url, 
                                                             last_modification=updated_date, 
                                                             to_process=True,
-                                                            newspaper_id=self._newspaper.value))
+                                                            newspaper_id=self._newspaper.value,
+                                                            insert_date = self._now))
             elif dict_existing_urls[url].replace(tzinfo=tzoffset(None, 7200)) != updated_date.replace(tzinfo=tzoffset(None, 7200)):
                 self._l_urls_sitemap_updated.append(SitemapURLs(url= url, 
                                                                 last_modification=updated_date, 
                                                                 to_process=True,
-                                                                newspaper_id=self._newspaper.value))
+                                                                newspaper_id=self._newspaper.value,
+                                                                insert_date = self._now))
         
     def _add_new_urls(self):
         logger.info("DailyURLsScraper._add_new_urls")
+        if os.getenv("APP_ENV") == "dev":
+            self._l_urls_sitemap_new = self._l_urls_sitemap_new[:10]
+            
         with Session(get_engine()) as session:
             session.add_all(self._l_urls_sitemap_new)
             session.commit()
 
         logger.info(f"\t{len(self._l_urls_sitemap_new)} new URLs inserted into the database.")
         
-    def _update_urls(self):
-        logger.info("DailyURLsScraper._update_urls")
-        with Session(get_engine()) as session:
-            session.bulk_update_mappings(SitemapURLs, self._l_urls_sitemap_updated)
-            session.commit()
+    # def _update_urls(self):
+    #     logger.info("DailyURLsScraper._update_urls")
+    #     with Session(get_engine()) as session:
+    #         session.bulk_update_mappings(SitemapURLs, self._l_urls_sitemap_updated)
+    #         session.commit()
 
-        logger.info(f"{len(self._l_urls_sitemap_updated)} new URLs updated into the database.")
+    #     logger.info(f"{len(self._l_urls_sitemap_updated)} new URLs updated into the database.")
         
     def entry_point(self): 
         logger.info("DailyURLsScraper.entry_point")

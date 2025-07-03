@@ -8,11 +8,12 @@ from db.models import ArticlesURLs, Articles, Comments
 from utils.log import logger
 from utils.constants import ArticleStageEnum
 from utils.helpers import simple_get
+from utils.scraper import Scraper
 
 URL_COMMENT = 'https://api-graphql.lefigaro.fr/graphql?id=widget-comments_commentsQuery2_31d9f1fd61a3568936b76800aef3aade1b9002eee01930e2b9c499ceca28192e&variables={{"id":"{}","page":{}}}'
 URL_REPLY = 'https://api-graphql.lefigaro.fr/graphql?id=widget-comments_commentRepliesQuery2_f6f03af22e6093fb8d5a69caf102e33ae439b8587d763475a300e041d7985d10&variables={{"id":"{}"}}'
 
-class CommentsScraper:
+class CommentsScraper(Scraper):
     def __init__(self, article_id: int):
         logger.info("ArticlesInfo.__init__")
         self._article_id = article_id
@@ -53,7 +54,8 @@ class CommentsScraper:
                 contributor_id= self._get_author(comment["author"]),
                 author_type= self._get_author_type(comment["author"]),
                 parent_id= comment_id,
-                article_id= self._article_id
+                article_id= self._article_id,
+                insert_date = self._now
             ))
             if comment["repliesCount"] > 0:
                 self._get_replies(comment["id"])

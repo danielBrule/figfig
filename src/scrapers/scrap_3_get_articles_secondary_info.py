@@ -9,9 +9,9 @@ from db.models import ArticlesURLs, Articles, Keywords, ArticleKeywords
 from utils.log import logger
 from utils.constants import ArticleStageEnum
 from utils.helpers import simple_get
+from utils.scraper import Scraper
 
-
-class ArticlesSecondaryInfoScraper:
+class ArticlesSecondaryInfoScraper(Scraper):
     def __init__(self, article_id: int):
         logger.info("ArticlesSecondaryInfoScraper.__init__")
         self._article_id = article_id
@@ -82,7 +82,8 @@ class ArticlesSecondaryInfoScraper:
                                  publication_date=self._publication_date,
                                  last_modification_date=self._last_modification_date,
                                  description = self._description,
-                                 uid = self._uid)
+                                 uid = self._uid,
+                                 insert_date = self._now)
 
         with Session(get_engine()) as session:
             session.add(self._articles)
