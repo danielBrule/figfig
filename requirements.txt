@@ -8,4 +8,5 @@ requests
 beautifulsoup4
 azure-identity
 azure-keyvault-secrets
+azure-servicebus
 pytest

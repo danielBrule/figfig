@@ -35,6 +35,7 @@ resource "azurerm_container_group" "scrap_dailyurl" {
       LOG_DATETIME_FORMAT = "%Y-%m-%d_%H"
       LOG_FORMAT          = "%(asctime)s - %(levelname)s - %(message)s"
       KEY_VAULT_NAME      = "figfig-kv-${var.env}"
+      SERVICEBUS_CONNECTION_STRING = module.servicebus.primary_connection_string
     }
 
     ports {
@@ -79,6 +80,7 @@ resource "azurerm_container_group" "scrap_articles_primary_info" {
       LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
       LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
       KEY_VAULT_NAME="figfig-kv-${var.env}"
+      SERVICEBUS_CONNECTION_STRING = module.servicebus.primary_connection_string
     }
 
     ports {
@@ -123,6 +125,7 @@ resource "azurerm_container_group" "scrap_articles_secondary_info" {
       LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
       LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
       KEY_VAULT_NAME="figfig-kv-${var.env}"
+      SERVICEBUS_CONNECTION_STRING = module.servicebus.primary_connection_string
     }
 
     ports {
@@ -167,7 +170,7 @@ resource "azurerm_container_group" "scrap_comments" {
       LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
       LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
       KEY_VAULT_NAME="figfig-kv-${var.env}"
-
+      SERVICEBUS_CONNECTION_STRING = module.servicebus.primary_connection_string
     }
 
     ports {

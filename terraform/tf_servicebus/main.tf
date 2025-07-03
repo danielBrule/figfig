@@ -5,23 +5,32 @@ resource "azurerm_servicebus_namespace" "sb" {
   sku                 = "Standard"
 }
 
-resource "azurerm_servicebus_queue" "queue_articlesxml" {
-  name         = "queue_articles_xml"
+resource "azurerm_servicebus_queue" "queue_article_primary_info" {
+  name         = "queue_article_primary_info"
   namespace_id = azurerm_servicebus_namespace.sb.id
+
+
+  max_delivery_count = 2 
+  max_size_in_megabytes = 1024
+  lock_duration   = "PT5M" 
 }
 
-resource "azurerm_servicebus_queue" "queue_articles" {
-  name                = "queue_articles"
+resource "azurerm_servicebus_queue" "queue_article_secondary_info" {
+  name                = "queue_article_secondary_info"
   namespace_id        = azurerm_servicebus_namespace.sb.id
 
+  max_delivery_count = 2
   max_size_in_megabytes = 1024
+  lock_duration   = "PT5M"
 }
 
 resource "azurerm_servicebus_queue" "queue_comments" {
   name                = "queue_comments"
   namespace_id      = azurerm_servicebus_namespace.sb.id
 
+  max_delivery_count = 2
   max_size_in_megabytes = 1024
+  lock_duration   = "PT5M"
 }
 
 resource "azurerm_servicebus_namespace_authorization_rule" "queue_auth_rule" {

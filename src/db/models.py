@@ -88,3 +88,12 @@ class Comments(Base):
         Index('comments_article_id', 'article_id'),  
     )
 
+class Error(Base):
+    __tablename__ = "errors"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    stage = Column(String(50), nullable=False)
+    data_id = Column(String(400), nullable=False)
+    error_type = Column(String(100), nullable=False)
+    error_message = Column(String(1000), nullable=False)
+    attempted_at = Column(DateTime, nullable=False)
+
