@@ -20,6 +20,7 @@ URL_ARTICLES = "https://sitemaps.lefigaro.fr/lefigaro.fr/articles.xml"
 class DailyURLsScraper(Scraper):
     def __init__(self, newspaper: NewspaperEnum):
         logger.info("DailyURLsScraper.__init__")
+        super().__init__()
         self._newspaper = newspaper
         self._d_urls_sitemap = {}    
         self._l_urls_sitemap_new = []

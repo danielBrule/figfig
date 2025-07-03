@@ -14,6 +14,7 @@ from utils.scraper import Scraper
 class ArticlesSecondaryInfoScraper(Scraper):
     def __init__(self, article_id: int):
         logger.info("ArticlesSecondaryInfoScraper.__init__")
+        super().__init__()
         self._article_id = article_id
         self._url_articles = None
         self._articles = None

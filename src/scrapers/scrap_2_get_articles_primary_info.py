@@ -14,6 +14,7 @@ from utils.scraper import Scraper
 class ArticlesPrimaryInfoScraper(Scraper):
     def __init__(self, sitemap_urls_id: int):
         logger.info("class ArticlesPrimaryInfoScraper.__init__")
+        super().__init__()
         self._sitemap_urls_id = sitemap_urls_id
         self._orl_articles = []
         self._l_all_articles_urls = []

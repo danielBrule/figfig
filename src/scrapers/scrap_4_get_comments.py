@@ -16,6 +16,7 @@ URL_REPLY = 'https://api-graphql.lefigaro.fr/graphql?id=widget-comments_commentR
 class CommentsScraper(Scraper):
     def __init__(self, article_id: int):
         logger.info("ArticlesInfo.__init__")
+        super().__init__()
         self._article_id = article_id
         self._articles_uid = None
         self._comments = []
