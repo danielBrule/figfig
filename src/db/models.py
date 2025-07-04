@@ -5,17 +5,20 @@ Base = declarative_base()
 
 class Newspaper(Base):
     __tablename__ = "newspaper"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
 
 class ArticleStage(Base):
     __tablename__ = "article_stage"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True)
     article_stage = Column(String(50), nullable=False)
 
 
 class SitemapURLs(Base):
     __tablename__ = "sitemap_urls"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String(200), nullable=False)
     last_modification = Column(DateTime, nullable=False)
@@ -31,6 +34,7 @@ class SitemapURLs(Base):
 
 class ArticlesURLs(Base):
     __tablename__ = "articles_urls"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True, autoincrement=True)
     url = Column(String(400), nullable=False)
     last_modification = Column(DateTime, nullable=False)
@@ -45,6 +49,7 @@ class ArticlesURLs(Base):
 
 class Keywords(Base):
     __tablename__ = "keywords"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True, autoincrement=True)
     full_keyword = Column(String(200), nullable=False)
     __table_args__ = (
@@ -55,6 +60,7 @@ class Keywords(Base):
     
 class Articles(Base):
     __tablename__ = "articles"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, ForeignKey("articles_urls.id"), primary_key=True)
     uid = Column(String(200), nullable=False)
     title = Column(String(500), nullable=False)
@@ -65,12 +71,14 @@ class Articles(Base):
 
 class ArticleKeywords(Base):
     __tablename__ = "article_keywords"
+    __table_args__ = {"schema": "dbo"}
     article_id = Column(Integer, ForeignKey("articles.id"), nullable=False, primary_key=True)
     keyword_id = Column(Integer, ForeignKey("keywords.id"), nullable=False, primary_key=True)
 
 
 class Comments(Base):
     __tablename__ = "comments"
+    __table_args__ = {"schema": "dbo"}
     id = Column(String(100), primary_key=True)
     comment = Column(String(2000), nullable=False)
     comment_date = Column(DateTime, nullable=False)
@@ -90,6 +98,7 @@ class Comments(Base):
 
 class Error(Base):
     __tablename__ = "errors"
+    __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True, autoincrement=True)
     stage = Column(String(50), nullable=False)
     data_id = Column(String(400), nullable=False)

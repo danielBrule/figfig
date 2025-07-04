@@ -136,6 +136,10 @@ class CommentsScraper(Scraper):
         if article_id is None:
             parser.get_one_message()
             parser._article_id = parser._servicebus_source_message
+            if parser._servicebus_source_message is None: 
+                logger.info("No messages to process in the queue.")
+                return 
+
         else:
             parser._article_id = article_id
 

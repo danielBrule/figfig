@@ -115,6 +115,9 @@ class ArticlesPrimaryInfoScraper(Scraper):
         if sitetmap_urls_id is None:
             parser.get_one_message()
             parser._sitemap_urls_id = parser._servicebus_source_message
+            if parser._servicebus_source_message is None: 
+                logger.info("No messages to process in the queue.")
+                return 
         else:
             parser._sitemap_urls_id = sitetmap_urls_id
 
