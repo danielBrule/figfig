@@ -236,7 +236,7 @@ client_id = "<XXX>"
 tenant_id = "<XXX>"
 ```
 
-# 6. Github actions secrets 
+# 7. Github actions secrets 
 |Key                        |value|
 |---------------------------|-------------------|
 |AZURE_CLIENT_ID            | cf 2.2.           |
@@ -262,7 +262,7 @@ tenant_id = "<XXX>"
 
 
 
-# 7. Feature Matrix: ACI, AKS, and App Services
+# 8. Feature Matrix: ACI, AKS, and App Services
 | Feature                 | ACI                          | AKS                          | App Services for Containers       |
 |-------------------------|------------------------------|-------------------------------|-----------------------------------|
 | Management overhead     | Very Low                     | High                          | Low                               |
@@ -272,3 +272,8 @@ tenant_id = "<XXX>"
 | Start-up time           | Fast                         | Moderate                      | Fast                              |
 | Networking control      | Limited (unless in VNet)     | Full VNet, NSG, Ingress       | Limited                           |
 | Orchestration features  | None                         | Full Kubernetes               | Minimal                           |
+
+# 9 run unit tests 
+```cmd
+pytest
+```

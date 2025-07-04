@@ -28,8 +28,8 @@ class ArticlesSecondaryInfoScraper(Scraper):
         self._l_keywords_id = None
         self._description = None
         self._uid = None
-        self._queue_source = ServiceQueue.articles_secondary_info.value
-        self._queue_destination = ServiceQueue.comments.value
+        self._service_bus_queue_source = ServiceQueue.articles_secondary_info.value
+        self._service_bus_queue_destination = ServiceQueue.comments.value
 
     def _get_article_url(self):
         logger.info("ArticlesSecondaryInfoScraper._get_article_url")

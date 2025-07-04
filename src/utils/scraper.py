@@ -7,7 +7,7 @@ from azure.servicebus import (
 from abc import ABC, abstractmethod
 import datetime
 from sqlalchemy.orm import Session
-from db.models import ScraperError
+from db.models import Error
 from db.database import get_engine
 
 class Scraper(ABC):
@@ -89,7 +89,7 @@ class Scraper(ABC):
 
     
     def log_scraper_error(self,  id, error):
-        error_entry = ScraperError(
+        error_entry = Error(
             scraper_stage=self._stage,
             data_id=id,
             error_type=type(error).__name__,

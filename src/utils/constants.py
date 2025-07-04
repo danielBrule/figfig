@@ -17,5 +17,5 @@ class ArticleStageEnum(Enum):
 
 class ServiceQueue(Enum):
     articles_primary_info = "queue_article_primary_info"
-    article_secondary_info = "queue_article_secondary_info"
+    articles_secondary_info = "queue_article_secondary_info"
     comments = "queue_comments"

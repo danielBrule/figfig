@@ -23,7 +23,7 @@ class CommentsScraper(Scraper):
         self._article_id = None
         self._articles_uid = None
         self._comments = []
-        self._queue_source = ServiceQueue.comments.value
+        self._service_bus_queue_source = ServiceQueue.comments.value
 
     def _get_article_uid(self):
         logger.info("Comments._get_article_url")
@@ -129,7 +129,7 @@ class CommentsScraper(Scraper):
             raise ex
 
     @staticmethod
-    def entry_point(article_id:int):
+    def entry_point(article_id:int = None):
         logger.info("ArticlesInfo.entry_point")
 
         parser = CommentsScraper()

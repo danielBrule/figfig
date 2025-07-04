@@ -6,6 +6,12 @@ from utils.constants import ArticleStageEnum
 from scrapers.scrap_2_get_articles_primary_info import ArticlesPrimaryInfoScraper  
 from db.models import SitemapURLs, ArticlesURLs
 
+# ✅ Patch env variable globally for all tests in this file
+@pytest.fixture(autouse=True)
+def mock_env_vars(monkeypatch):
+    monkeypatch.setenv("SERVICEBUS_CONNECTION_STRING", "Endpoint=sb://fake/;SharedAccessKeyName=fake;SharedAccessKey=fake-key")
+    monkeypatch.setenv("APP_ENV", "dev")
+    
 @pytest.fixture(autouse=True)
 def mock_key_vault_secret():
     with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:
@@ -29,7 +35,8 @@ FAKE_ARTICLE_XML = """
 # ----------------------------
 @patch("scrapers.scrap_2_get_articles_primary_info.Session")
 def test_get_sitemap_url(mock_session_class):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
+    scraper = ArticlesPrimaryInfoScraper()
+    scraper._sitemap_urls_id = 1
     mock_session = MagicMock()
     mock_session.execute.return_value.scalar_one_or_none.return_value = TEST_SITEMAP_URL
     mock_session_class.return_value.__enter__.return_value = mock_session
@@ -44,7 +51,8 @@ def test_get_sitemap_url(mock_session_class):
 # ----------------------------
 @patch("scrapers.scrap_2_get_articles_primary_info.requests.get")
 def test_get_articles_url_parses_correctly(mock_get):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
+    scraper = ArticlesPrimaryInfoScraper()
+    scraper._sitemap_urls_id = 1
     scraper._url_articles_xml = TEST_SITEMAP_URL
 
     mock_response = MagicMock()
@@ -63,7 +71,8 @@ def test_get_articles_url_parses_correctly(mock_get):
 # ----------------------------
 @patch("scrapers.scrap_2_get_articles_primary_info.Session")
 def test_remove_urls_already_in_db(mock_session_class):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
+    scraper = ArticlesPrimaryInfoScraper()
+    scraper._sitemap_urls_id = 1
     scraper._l_all_articles_urls = ["https://example.com/article-1", "https://example.com/article-2"]
     scraper._orl_articles = [
         ArticlesURLs(url="https://example.com/article-1"),
@@ -85,7 +94,8 @@ def test_remove_urls_already_in_db(mock_session_class):
 # ----------------------------
 @patch("scrapers.scrap_2_get_articles_primary_info.Session")
 def test_add_new_urls_commits(mock_session_class):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
+    scraper = ArticlesPrimaryInfoScraper()
+    scraper._sitemap_urls_id = 1
     scraper._orl_articles = [ArticlesURLs(url="https://example.com/article-1")]
 
     mock_session = MagicMock()
@@ -101,7 +111,8 @@ def test_add_new_urls_commits(mock_session_class):
 # ----------------------------
 @patch("scrapers.scrap_2_get_articles_primary_info.Session")
 def test_update_sitemap_url_success(mock_session_class):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
+    scraper = ArticlesPrimaryInfoScraper()
+    scraper._sitemap_urls_id = 1
 
     mock_session = MagicMock()
     obj = MagicMock()
@@ -115,7 +126,8 @@ def test_update_sitemap_url_success(mock_session_class):
 
 @patch("scrapers.scrap_2_get_articles_primary_info.Session")
 def test_update_sitemap_url_failure(mock_session_class):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
+    scraper = ArticlesPrimaryInfoScraper()
+    scraper._sitemap_urls_id = 1
     scraper._l_new_articles_urls = ["https://example.com/article-1"]
 
     # First context: fails on .one()
@@ -142,40 +154,38 @@ def test_update_sitemap_url_failure(mock_session_class):
 # ----------------------------
 # entry_point
 # ----------------------------
-@patch.object(ArticlesPrimaryInfoScraper, "_get_sitemap_url")
-@patch.object(ArticlesPrimaryInfoScraper, "_get_articles_url")
-@patch.object(ArticlesPrimaryInfoScraper, "_remove_urls_already_in_db")
-@patch.object(ArticlesPrimaryInfoScraper, "_add_new_urls")
-@patch.object(ArticlesPrimaryInfoScraper, "_update_sitemap_url")
-def test_entry_point_with_new_articles(
-    mock_update, mock_add, mock_remove, mock_get_articles, mock_get_sitemap
-):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
-    scraper._l_new_articles_urls = ["https://example.com/article-1"]
+@patch("utils.scraper.ServiceBusClient")
+def test_entry_point_with_new_articles(mock_sb_client):
+    with patch("scrapers.scrap_2_get_articles_primary_info.ArticlesPrimaryInfoScraper") as mock_scraper_cls:
+        scraper_instance = MagicMock()
+        mock_scraper_cls.return_value = scraper_instance
 
-    scraper.entry_point()
+        scraper_instance._l_new_articles_urls = ["https://example.com/article-1"]
 
-    mock_get_sitemap.assert_called_once()
-    mock_get_articles.assert_called_once()
-    mock_remove.assert_called_once()
-    mock_add.assert_called_once()
-    mock_update.assert_called_once()
+        ArticlesPrimaryInfoScraper.entry_point(sitetmap_urls_id=1)
 
-@patch.object(ArticlesPrimaryInfoScraper, "_get_sitemap_url")
-@patch.object(ArticlesPrimaryInfoScraper, "_get_articles_url")
-@patch.object(ArticlesPrimaryInfoScraper, "_remove_urls_already_in_db")
-@patch.object(ArticlesPrimaryInfoScraper, "_add_new_urls")
-@patch.object(ArticlesPrimaryInfoScraper, "_update_sitemap_url")
-def test_entry_point_with_no_new_articles(
-    mock_update, mock_add, mock_remove, mock_get_articles, mock_get_sitemap
-):
-    scraper = ArticlesPrimaryInfoScraper(sitemap_urls_id=1)
-    scraper._l_new_articles_urls = []
+        scraper_instance._get_sitemap_url.assert_called_once()
+        scraper_instance._get_articles_url.assert_called_once()
+        scraper_instance._remove_urls_already_in_db.assert_called_once()
+        scraper_instance._add_new_urls.assert_called_once()
+        scraper_instance._update_sitemap_url.assert_called_once()
+        scraper_instance.complete_message.assert_called_once()
+        scraper_instance.abandon_message.assert_not_called()
 
-    scraper.entry_point()
 
-    mock_get_sitemap.assert_called_once()
-    mock_get_articles.assert_called_once()
-    mock_remove.assert_called_once()
-    mock_add.assert_not_called()
-    mock_update.assert_not_called()
+@patch("utils.scraper.ServiceBusClient")
+def test_entry_point_with_no_new_articles(mock_sb_client):
+    with patch("scrapers.scrap_2_get_articles_primary_info.ArticlesPrimaryInfoScraper") as mock_scraper_cls:
+        scraper_instance = MagicMock()
+        mock_scraper_cls.return_value = scraper_instance
+
+        scraper_instance._l_new_articles_urls = []
+
+        ArticlesPrimaryInfoScraper.entry_point(sitetmap_urls_id=1)
+
+        scraper_instance._get_sitemap_url.assert_called_once()
+        scraper_instance._get_articles_url.assert_called_once()
+        scraper_instance._remove_urls_already_in_db.assert_called_once()
+        scraper_instance._add_new_urls.assert_not_called()
+        scraper_instance._update_sitemap_url.assert_not_called()
+        scraper_instance.complete_message.assert_called_once()  # <-- fix here

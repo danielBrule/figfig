@@ -24,8 +24,8 @@ class ArticlesPrimaryInfoScraper(Scraper):
         self._l_new_articles_urls = []
 
         self._url_articles_xml = None
-        self._queue_source = ServiceQueue.articles_primary_info.value
-        self._queue_destination = ServiceQueue.articles_secondary_info.value
+        self._service_bus_queue_source = ServiceQueue.articles_primary_info.value
+        self._service_bus_queue_destination = ServiceQueue.articles_secondary_info.value
 
     def _get_sitemap_url(self):
         logger.info("ArticlesPrimaryInfoScraper._get_sitemap_url")

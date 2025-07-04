@@ -7,6 +7,12 @@ from utils.constants import  NewspaperEnum
 from db.models import SitemapURLs
 
 
+# ✅ Patch env variable globally for all tests in this file
+@pytest.fixture(autouse=True)
+def mock_env_vars(monkeypatch):
+    monkeypatch.setenv("SERVICEBUS_CONNECTION_STRING", "Endpoint=sb://fake/;SharedAccessKeyName=fake;SharedAccessKey=fake-key")
+    monkeypatch.setenv("APP_ENV", "dev")
+
 @pytest.fixture(autouse=True)
 def mock_key_vault_secret():
     with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:

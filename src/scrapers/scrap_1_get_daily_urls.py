@@ -26,7 +26,7 @@ class DailyURLsScraper(Scraper):
         self._d_urls_sitemap = {}
         self._l_urls_sitemap_new = []
         self._l_urls_sitemap_updated = []
-        self._queue_destination = ServiceQueue.articles_primary_info.value
+        self._service_bus_queue_destination = ServiceQueue.articles_primary_info.value
 
     def _get_daily_urls(self):
         logger.info("DailyURLsScraper._get_daily_urls")

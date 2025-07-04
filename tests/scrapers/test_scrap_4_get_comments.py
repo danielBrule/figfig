@@ -4,6 +4,12 @@ import pytest
 from unittest.mock import patch, MagicMock
 from scrapers.scrap_4_get_comments import CommentsScraper  # Replace with the actual module path
 
+# ✅ Patch env variable globally for all tests in this file
+@pytest.fixture(autouse=True)
+def mock_env_vars(monkeypatch):
+    monkeypatch.setenv("SERVICEBUS_CONNECTION_STRING", "Endpoint=sb://fake/;SharedAccessKeyName=fake;SharedAccessKey=fake-key")
+    monkeypatch.setenv("APP_ENV", "dev")
+
 @pytest.fixture(autouse=True)
 def mock_key_vault_secret():
     with patch("azure.keyvault.secrets.SecretClient.get_secret") as mock_get_secret:
@@ -14,7 +20,8 @@ def mock_key_vault_secret():
 # Test: _get_author & _get_author_type
 # -----------------------
 def test_get_author_and_type():
-    scraper = CommentsScraper(article_id=123)
+    scraper = CommentsScraper()
+    scraper._article_id = 123
 
     author = {"username": "johndoe", "__typename": "UserType"}
     expected_hash = hashlib.md5("johndoe".encode("utf-8")).hexdigest()
@@ -31,7 +38,8 @@ def test_get_author_and_type():
 @patch("scrapers.scrap_4_get_comments.Session")  # Adjust path as needed
 @patch("scrapers.scrap_4_get_comments.get_engine")
 def test_get_article_uid(mock_engine, mock_session_class):
-    scraper = CommentsScraper(article_id=1)
+    scraper = CommentsScraper()
+    scraper._article_id = 1
 
     mock_session = MagicMock()
     mock_session.execute.return_value.scalar_one_or_none.return_value = "uid-xyz"
@@ -45,7 +53,8 @@ def test_get_article_uid(mock_engine, mock_session_class):
 # -----------------------
 @patch("scrapers.scrap_4_get_comments.simple_get")
 def test_get_replies(mock_simple_get):
-    scraper = CommentsScraper(article_id=1)
+    scraper = CommentsScraper()
+    scraper._article_id = 1
 
     reply_data = {
         "data": {
@@ -73,7 +82,8 @@ def test_get_replies(mock_simple_get):
 # -----------------------
 @patch("scrapers.scrap_4_get_comments.simple_get")
 def test_get_articles_comments(mock_simple_get):
-    scraper = CommentsScraper(article_id=1)
+    scraper = CommentsScraper()
+    scraper._article_id = 1
     scraper._articles_uid = "uid-abc"
 
     mock_simple_get.side_effect = [
@@ -104,7 +114,8 @@ def test_get_articles_comments(mock_simple_get):
 @patch("scrapers.scrap_4_get_comments.Session")
 @patch("scrapers.scrap_4_get_comments.get_engine")
 def test_add_new_comments(mock_engine, mock_session_class):
-    scraper = CommentsScraper(article_id=1)
+    scraper = CommentsScraper()
+    scraper._article_id = 1
     mock_comment = MagicMock()
     scraper._comments = [mock_comment]
 
@@ -122,7 +133,8 @@ def test_add_new_comments(mock_engine, mock_session_class):
 @patch("scrapers.scrap_4_get_comments.Session")
 @patch("scrapers.scrap_4_get_comments.get_engine")
 def test_update_stage_success(mock_engine, mock_session_class):
-    scraper = CommentsScraper(article_id=1)
+    scraper = CommentsScraper()
+    scraper._article_id = 1
 
     mock_obj = MagicMock()
     mock_session = MagicMock()
@@ -137,15 +149,32 @@ def test_update_stage_success(mock_engine, mock_session_class):
 # -----------------------
 # Test: entry_point (all steps)
 # -----------------------
-@patch.object(CommentsScraper, "_get_article_uid")
-@patch.object(CommentsScraper, "_get_articles_comments")
-@patch.object(CommentsScraper, "_add_new_comments")
+
+@patch("utils.scraper.ServiceBusClient")  # Prevent Azure call
+@patch.object(CommentsScraper, "abandon_message")
+@patch.object(CommentsScraper, "log_scraper_error")
 @patch.object(CommentsScraper, "_update_stage")
-def test_entry_point(mock_update, mock_add_comments, mock_get_comments, mock_get_uid):
-    scraper = CommentsScraper(article_id=1)
-    scraper.entry_point()
+@patch.object(CommentsScraper, "_add_new_comments")
+@patch.object(CommentsScraper, "_get_articles_comments")
+@patch.object(CommentsScraper, "_get_article_uid")
+def test_entry_point(
+    mock_get_uid,
+    mock_get_comments,
+    mock_add_comments,
+    mock_update_stage,
+    mock_log_error,
+    mock_abandon_message,
+    mock_sb_client
+):
+    scraper = CommentsScraper()
+    scraper._service_bus_queue_source = "queue_comments"  # to avoid init errors
+
+    # Run entry point with article_id so queue is not hit
+    CommentsScraper.entry_point(article_id=456)
 
     mock_get_uid.assert_called_once()
     mock_get_comments.assert_called_once()
     mock_add_comments.assert_called_once()
-    mock_update.assert_called_once()
+    mock_update_stage.assert_called_once()
+    mock_abandon_message.assert_not_called()
+    mock_log_error.assert_not_called()
