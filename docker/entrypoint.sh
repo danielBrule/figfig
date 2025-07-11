@@ -7,7 +7,7 @@ if [ -f .env ]; then
 fi
 
 
-if ! python -c "from sqlalchemy import inspect; from db.database import engine; print(inspect(engine).has_table('newspaper'))" | grep True; then
+if ! python -c "from sqlalchemy import inspect; from db.database import get_engine; print(inspect(get_engine()).has_table('newspaper'))" | grep True; then
   echo "Tables missing, running init_db.py..."
   python ./init_db.py
 else
