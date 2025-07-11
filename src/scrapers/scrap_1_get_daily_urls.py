@@ -89,12 +89,11 @@ class DailyURLsScraper(Scraper):
         logger.info(
             f"\t{len(self._l_urls_sitemap_new)} new URLs inserted into the database."
         )
-    
+
     def _send_message_to_service_bus(self):
         new_ids = [u.id for u in self._l_urls_sitemap_new]
         for id in new_ids:
             self.send_message(message_text=str(id))
-        
 
     # def _update_urls(self):
     #     logger.info("DailyURLsScraper._update_urls")
@@ -121,7 +120,11 @@ class DailyURLsScraper(Scraper):
             logger.error(f"Error: {e}")
             parser.log_scraper_error(id=None, error=e)
         # self._update_urls()
+        logger.info("DailyURLsScraper completed successfully.")
 
 
 if __name__ == "__main__":
-    DailyURLsScraper.entry_point()
+    if os.getenv("ON_AZURE") is not None and os.getenv("ON_AZURE").lower() == "true":
+        DailyURLsScraper.entry_point()
+    else:
+        DailyURLsScraper.entry_point()

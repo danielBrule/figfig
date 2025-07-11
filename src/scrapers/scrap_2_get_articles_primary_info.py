@@ -4,7 +4,7 @@ from enum import Enum
 import dateutil
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
+import os 
 from db.database import get_engine
 from db.models import ArticlesURLs, SitemapURLs
 from utils.log import logger
@@ -151,7 +151,11 @@ class ArticlesPrimaryInfoScraper(Scraper):
                 logger.error(f"Error: {e}")
                 scraper.abandon_message()
                 scraper.log_scraper_error(id=scraper._sitemap_urls_id, error=e)
+        logger.info("ArticlesPrimaryInfoScraper completed successfully.")
 
 
 if __name__ == "__main__":
-    ArticlesPrimaryInfoScraper.entry_point(sitetmap_urls_id=12)
+    if os.getenv("ON_AZURE") is not None and os.getenv("ON_AZURE").lower() == "true":
+        ArticlesPrimaryInfoScraper.entry_point()
+    else:
+        ArticlesPrimaryInfoScraper.entry_point(sitetmap_urls_id=12)

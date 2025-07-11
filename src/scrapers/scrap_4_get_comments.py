@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
+import os 
 import json
 import hashlib
 from db.database import get_engine
@@ -160,8 +160,11 @@ class CommentsScraper(Scraper):
                 logger.error(f"Error: {e}")
                 scraper.abandon_message()
                 scraper.log_scraper_error(id=scraper._article_id, error=e)
+    logger.info("CommentsScraper completed successfully.")
 
 
 if __name__ == "__main__":
-
-    CommentsScraper.entry_point(article_id=12)
+    if os.getenv("ON_AZURE") is not None and os.getenv("ON_AZURE").lower() == "true":
+        CommentsScraper.entry_point()
+    else:   
+        CommentsScraper.entry_point(article_id=12)

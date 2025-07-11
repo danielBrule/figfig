@@ -28,7 +28,7 @@ def get_engine():
 
         # SQLAlchemy connection string
         connection_string = f"mssql+pyodbc://{USERNAME}:{PASSWORD}@{SERVER}:1433/{DATABASE}?driver={DRIVER.replace(' ', '+')}"
-        logger.info(f"KEY_VAULT_NAME: {KEY_VAULT_NAME}")
+        logger.info(f"key vault name: {KEY_VAULT_NAME}")
 
 
         logger.info(f"connection_string: {connection_string}")

@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+import os 
 import dateutil
 from db.database import get_engine
 from db.models import ArticlesURLs, Articles, Keywords, ArticleKeywords
@@ -193,7 +194,11 @@ class ArticlesSecondaryInfoScraper(Scraper):
                 logger.error(f"Error: {e}")
                 scraper.abandon_message()
                 scraper.log_scraper_error(id=scraper._article_id, error=e)
+    logger.info("ArticlesSecondaryInfoScraper completed successfully.")
 
 
 if __name__ == "__main__":
-    ArticlesSecondaryInfoScraper.entry_point(12)
+    if os.getenv("ON_AZURE") is not None and os.getenv("ON_AZURE").lower() == "true":
+        ArticlesSecondaryInfoScraper.entry_point()
+    else:
+        ArticlesSecondaryInfoScraper.entry_point(12)
