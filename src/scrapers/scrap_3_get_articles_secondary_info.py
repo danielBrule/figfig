@@ -188,7 +188,7 @@ class ArticlesSecondaryInfoScraper(Scraper):
                 scraper._add_articles()
                 scraper.add_keywords()
                 scraper._update_stage()
-                scraper.send_message(message_text=str(scraper._article_id))
+                scraper.send_message(messages=[str(scraper._article_id)])
                 scraper.complete_message()
             except Exception as e:
                 logger.error(f"Error: {e}")

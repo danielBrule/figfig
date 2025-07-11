@@ -120,9 +120,8 @@ class ArticlesPrimaryInfoScraper(Scraper):
 
     def _send_message_to_service_bus(self):
         logger.info("ArticlesPrimaryInfoScraper._send_message_to_service_bus")
-        new_ids = [u.id for u in self._l_all_articles]
-        for id in new_ids:
-            self.send_message(message_text=str(id))
+        new_ids = [str(u.id) for u in self._l_all_articles]
+        self.send_message(messages=new_ids)
 
     def _error_recovery(self) -> None:
         # todo

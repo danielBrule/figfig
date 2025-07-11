@@ -47,10 +47,14 @@ class Scraper(ABC):
         # execution steps here
         True
 
-    def send_message(self, message_text: str):
+    def send_message(self, messages: list[str]):
         if self._service_bus_queue_destination is None:
             raise ValueError("Queue destination is not set.")
-        logger.info(f"Sending message {message_text} for {self._stage} to queue: {self._service_bus_queue_destination}"  )
+
+        logger.info(
+            f"Sending {len(messages)} messages for {self._stage} to queue: {self._service_bus_queue_destination}"
+        )
+
         servicebus_client = ServiceBusClient.from_connection_string(
             conn_str=self._servicebus_connection_str, logging_enable=True
         )
@@ -60,9 +64,10 @@ class Scraper(ABC):
                 queue_name=self._service_bus_queue_destination
             )
             with sender:
-                message = ServiceBusMessage(message_text)
-                sender.send_messages(message)
-                print(f"Sent: {message_text}")
+                # Build a list of ServiceBusMessage objects
+                servicebus_messages = [ServiceBusMessage(msg) for msg in messages]
+                sender.send_messages(servicebus_messages)  # ✅ batch send
+                logger.info(f"✅ Sent {len(messages)} messages.")
 
     def get_one_message(self):
         """
@@ -71,7 +76,9 @@ class Scraper(ABC):
         logger.info("get_one_message")
         if self._service_bus_queue_source is None:
             raise ValueError("Queue source is not set.")
-        logger.info(f"\t\tRetrieving one message from queue: {self._service_bus_queue_source}")
+        logger.info(
+            f"\t\tRetrieving one message from queue: {self._service_bus_queue_source}"
+        )
 
         with self._servicebus_client:
             receiver = self._servicebus_client.get_queue_receiver(
@@ -83,7 +90,9 @@ class Scraper(ABC):
                 logger.info(f"\t\tReceived {len(messages)} messages.")
                 if len(messages):
                     self._servicebus_source_message = messages[0]
-                    logger.info(f"\t\tMessage received: {self._servicebus_source_message}")
+                    logger.info(
+                        f"\t\tMessage received: {self._servicebus_source_message}"
+                    )
 
     def complete_message(self) -> None:
         """
