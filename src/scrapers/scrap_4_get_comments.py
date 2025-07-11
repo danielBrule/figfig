@@ -74,26 +74,39 @@ class CommentsScraper(Scraper):
         page_cpt = 1
 
         while True:
-            logger.info(f"Page {page_cpt}, # comments: {len(self._comments)}")
-            raw_json = simple_get(URL_COMMENT.format(self._articles_uid, page_cpt))
-            comments = json.loads(raw_json)
-            if len(comments["data"]["comments"]) == 0:
-                break
-            for comment in comments["data"]["comments"]:
-                self._comments.append(
-                    Comments(
-                        id=comment["id"],
-                        comment=comment["text"],
-                        comment_date=comment["createdAt"],
-                        replies_count=comment["repliesCount"],
-                        contributor_id=self._get_author(comment["author"]),
-                        author_type=self._get_author_type(comment["author"]),
-                        parent_id=None,
-                        article_id=self._article_id,
-                    )
-                )
-                if comment["repliesCount"] > 0:
-                    self._get_replies(comment["id"])
+            try:
+                logger.info(f"\tPage {page_cpt}, # comments: {len(self._comments)}")
+                raw_json = simple_get(URL_COMMENT.format(self._articles_uid, page_cpt))
+                comments = json.loads(raw_json)
+                if len(comments["data"]["comments"]) == 0:
+                    break
+                for comment in comments["data"]["comments"]:
+                    try: 
+                        self._comments.append(
+                            Comments(
+                                id=comment["id"],
+                                comment=comment["text"],
+                                comment_date=comment["createdAt"],
+                                replies_count=comment["repliesCount"],
+                                contributor_id=self._get_author(comment["author"]),
+                                author_type=self._get_author_type(comment["author"]),
+                                parent_id=None,
+                                article_id=self._article_id,
+                            )
+                        )
+                        if comment["repliesCount"] > 0:
+                            try:
+                                self._get_replies(comment["id"])
+                            except Exception as e:
+                                logger.error(f"\tError while fetching replies for comment {comment['id']}: {e}")
+                                continue
+                    except Exception as e:
+                        logger.error(f"\tError while processing comment {comment['id']}: {e}")
+                        continue
+            except Exception as e:
+                logger.error(f"\tError while fetching comments: {e}")
+                self._error_recovery()
+                continue
             page_cpt += 1
 
     def _add_new_comments(self):
