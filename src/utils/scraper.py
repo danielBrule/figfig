@@ -70,13 +70,16 @@ class Scraper(ABC):
         """
         if self._service_bus_queue_destination is None:
             raise ValueError("Queue destination is not set.")
+        logger.info(f"Retrieving one message from queue: {self._service_bus_queue_destination}")
 
         with self._servicebus_client:
             receiver = self._servicebus_client.get_queue_receiver(
                 queue_name=self._service_bus_queue_destination, max_wait_time=5
             )
             with receiver:
+                logger.info("Receiving messages...")
                 messages = receiver.receive_messages(max_message_count=1)
+                logger.info(f"Received {len(messages)} messages.")
                 if messages:
                     self._servicebus_source_message = messages[0]
 
