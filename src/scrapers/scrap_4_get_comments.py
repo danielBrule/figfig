@@ -40,6 +40,8 @@ class CommentsScraper(Scraper):
             if "username" in node_author
             else node_author["signature"]
         )
+        if name is None:
+            return ""
         return hashlib.md5(name.encode("utf-8")).hexdigest()
 
     def _get_author_type(self, node_author) -> str:
