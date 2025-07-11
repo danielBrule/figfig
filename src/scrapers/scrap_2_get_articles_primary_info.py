@@ -107,6 +107,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
             raise ex
 
     def _send_message_to_service_bus(self):
+        logger.info("ArticlesPrimaryInfoScraper._send_message_to_service_bus")
         new_ids = [u.id for u in self._orl_articles]
         for id in new_ids:
             self.send_message(message_text=str(id))
@@ -143,12 +144,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
                     logger.warning(
                         f"ArticlesPrimaryInfoScraper._update_sitemap_url '{scraper._url_articles_xml}' has no new articles"
                     )
-                if scraper._orl_articles:
-                    for ids in scraper._orl_articles:
-                        logger.info(f"Article URL: {ids.url}")                        
-                        scraper._send_message_to_service_bus(
-                            message_text=str(ids.id)  
-                        )
+                scraper._send_message_to_service_bus()
                 scraper.complete_message()
             except Exception as e:
                 logger.error(f"Error: {e}")
