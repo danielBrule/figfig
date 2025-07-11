@@ -61,10 +61,10 @@ def test_get_articles_url_parses_correctly(mock_get):
 
     scraper._get_articles_url()
 
-    assert len(scraper._orl_articles) == 1
-    assert scraper._orl_articles[0].url == "https://example.com/article-1"
-    assert scraper._orl_articles[0].priority == "0.8"
-    assert scraper._orl_articles[0].stage == ArticleStageEnum.UrlGathered.value
+    assert len(scraper._l_all_articles) == 1
+    assert scraper._l_all_articles[0].url == "https://example.com/article-1"
+    assert scraper._l_all_articles[0].priority == "0.8"
+    assert scraper._l_all_articles[0].stage == ArticleStageEnum.UrlGathered.value
 
 # ----------------------------
 # _remove_urls_already_in_db
@@ -74,7 +74,7 @@ def test_remove_urls_already_in_db(mock_session_class):
     scraper = ArticlesPrimaryInfoScraper()
     scraper._sitemap_urls_id = 1
     scraper._l_all_articles_urls = ["https://example.com/article-1", "https://example.com/article-2"]
-    scraper._orl_articles = [
+    scraper._l_all_articles = [
         ArticlesURLs(url="https://example.com/article-1"),
         ArticlesURLs(url="https://example.com/article-2"),
     ]
@@ -86,8 +86,8 @@ def test_remove_urls_already_in_db(mock_session_class):
     scraper._remove_urls_already_in_db()
 
     assert scraper._l_new_articles_urls == ["https://example.com/article-2"]
-    assert len(scraper._orl_articles) == 1
-    assert scraper._orl_articles[0].url == "https://example.com/article-2"
+    assert len(scraper._l_new_articles) == 1
+    assert scraper._l_new_articles[0].url == "https://example.com/article-2"
 
 # ----------------------------
 # _add_new_urls
@@ -96,14 +96,14 @@ def test_remove_urls_already_in_db(mock_session_class):
 def test_add_new_urls_commits(mock_session_class):
     scraper = ArticlesPrimaryInfoScraper()
     scraper._sitemap_urls_id = 1
-    scraper._orl_articles = [ArticlesURLs(url="https://example.com/article-1")]
+    scraper._l_all_articles = [ArticlesURLs(url="https://example.com/article-1")]
 
     mock_session = MagicMock()
     mock_session_class.return_value.__enter__.return_value = mock_session
 
     scraper._add_new_urls()
 
-    mock_session.add_all.assert_called_once_with(scraper._orl_articles)
+    mock_session.add_all.assert_called_once_with(scraper._l_new_articles)
     mock_session.commit.assert_called_once()
 
 # ----------------------------

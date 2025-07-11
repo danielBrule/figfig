@@ -4,7 +4,7 @@ from enum import Enum
 import dateutil
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-import os 
+import os
 from db.database import get_engine
 from db.models import ArticlesURLs, SitemapURLs
 from utils.log import logger
@@ -19,8 +19,10 @@ class ArticlesPrimaryInfoScraper(Scraper):
         super().__init__()
         self._stage = "ArticlesPrimaryInfoScraper"
         self._sitemap_urls_id = None
-        self._orl_articles = []
+        self._l_all_articles = []
         self._l_all_articles_urls = []
+
+        self._l_new_articles = []
         self._l_new_articles_urls = []
 
         self._url_articles_xml = None
@@ -32,6 +34,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
         stmt = select(SitemapURLs.url).where(SitemapURLs.id == self._sitemap_urls_id)
         with Session(get_engine()) as session:
             self._url_articles_xml = session.execute(stmt).scalar_one_or_none()
+            logger.info(f"\tURL: {self._url_articles_xml}")
 
     def _get_articles_url(self):
         logger.info("ArticlesPrimaryInfoScraper._get_articles_url")
@@ -42,7 +45,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
             lastmod = sitemap.find("ns:lastmod", NAMESPACE).text
             lastmod = dateutil.parser.isoparse(lastmod)
             priority = sitemap.find("ns:priority", NAMESPACE).text
-            self._orl_articles.append(
+            self._l_all_articles.append(
                 ArticlesURLs(
                     url=loc,
                     last_modification=lastmod,
@@ -53,10 +56,10 @@ class ArticlesPrimaryInfoScraper(Scraper):
                 )
             )
             self._l_all_articles_urls.append(loc)
-        logger.info(f"\t{len(self._orl_articles)} articles' urls gathered")
+        logger.info(f"\t{len(self._l_all_articles)} articles' urls gathered")
 
     def _remove_urls_already_in_db(self):
-        logger.info("ArticlesPrimaryInfoScraper._remove_existing_sitemap")
+        logger.info("ArticlesPrimaryInfoScraper._remove_urls_already_in_db")
         stmt = select(ArticlesURLs.url).where(
             ArticlesURLs.url.in_(self._l_all_articles_urls)
         )
@@ -68,21 +71,30 @@ class ArticlesPrimaryInfoScraper(Scraper):
         self._l_new_articles_urls = [
             val for val in self._l_all_articles_urls if val not in existing_values
         ]
+        logger.info(
+            f"\t{len(self._l_new_articles_urls)} new articles' urls to be inserted into the database."
+        )
 
-        self._orl_articles = [
+        self._l_new_articles = [
             article
-            for article in self._orl_articles
+            for article in self._l_all_articles
             if article.url in self._l_new_articles_urls
         ]
+        logger.info(
+            f"\t{len(self._l_new_articles)} articles' will be inserted into the database."
+        )
+        assert len(self._l_new_articles) == len(self._l_new_articles_urls), (
+            "The number of articles to be inserted does not match the number of new URLs."
+        )
 
     def _add_new_urls(self):
         logger.info("ArticlesPrimaryInfoScraper._add_new_urls")
         with Session(get_engine(), expire_on_commit=False) as session:
-            session.add_all(self._orl_articles)
+            session.add_all(self._l_new_articles)
             session.commit()
 
         logger.info(
-            f"{len(self._orl_articles)} new articles' URLs inserted into the database."
+            f"{len(self._l_new_articles)} new articles' URLs inserted into the database."
         )
 
     def _update_sitemap_url(self):
@@ -108,7 +120,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
 
     def _send_message_to_service_bus(self):
         logger.info("ArticlesPrimaryInfoScraper._send_message_to_service_bus")
-        new_ids = [u.id for u in self._orl_articles]
+        new_ids = [u.id for u in self._l_all_articles]
         for id in new_ids:
             self.send_message(message_text=str(id))
 
