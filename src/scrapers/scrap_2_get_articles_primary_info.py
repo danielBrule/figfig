@@ -123,7 +123,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
 
         if sitetmap_urls_id is None:
             scraper.get_one_message()
-            scraper._sitemap_urls_id = int(scraper._servicebus_source_message)
+            scraper._sitemap_urls_id = int(str(scraper._servicebus_source_message))
             if scraper._servicebus_source_message is None:
                 logger.info("No messages to process in the queue.")
                 return

@@ -82,7 +82,7 @@ class Scraper(ABC):
                 messages = receiver.receive_messages(max_message_count=1)
                 logger.info(f"\t\tReceived {len(messages)} messages.")
                 if len(messages):
-                    self._servicebus_source_message = str(messages[0])
+                    self._servicebus_source_message = messages[0]
                     logger.info(f"\t\tMessage received: {self._servicebus_source_message}")
 
     def complete_message(self) -> None:
