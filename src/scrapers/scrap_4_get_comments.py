@@ -92,6 +92,7 @@ class CommentsScraper(Scraper):
                                 author_type=self._get_author_type(comment["author"]),
                                 parent_id=None,
                                 article_id=self._article_id,
+                                insert_date=self._now,
                             )
                         )
                         if comment["repliesCount"] > 0:
