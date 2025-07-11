@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
+from sqlalchemy.exc import IntegrityError
 import dateutil
 from db.database import get_engine
 from db.models import ArticlesURLs, Articles, Keywords, ArticleKeywords
@@ -76,25 +76,21 @@ class ArticlesSecondaryInfoScraper(Scraper):
 
     def _add_new_keywords(self):
         logger.info("ArticlesSecondaryInfoScraper._add_keywords")
-        stmt = select(Keywords.full_keyword).where(
-            Keywords.full_keyword.in_(self._l_keywords)
-        )
-
         with Session(get_engine()) as session:
-            existing_keywords = {row[0] for row in session.execute(stmt)}
-
-        # values NOT in the table
-        l_new_keywords = [
-            Keywords(full_keyword=keyword)
-            for keyword in self._l_keywords
-            if keyword not in existing_keywords
-        ]
-        logger.info(f"\t{len(l_new_keywords)} new keywords have been identified")
-
-        if len(l_new_keywords) > 0:
-            with Session(get_engine()) as session:
-                session.add_all(l_new_keywords)
-                session.commit()
+            for keyword in self._l_keywords:
+                try:
+                    kw = Keywords(full_keyword=keyword)
+                    session.add(kw)
+                    session.commit()
+                    logger.debug(f"✅ Inserted keyword: {keyword}")
+                except IntegrityError:
+                    session.rollback()  # Already inserted by another scraper
+                    logger.debug(f"⚠️ Keyword already exists (ignored): {keyword}")
+                except Exception as ex:
+                    session.rollback()
+                    logger.error(
+                        f"❌ Unexpected error inserting keyword '{keyword}': {ex}"
+                    )
 
     def _get_keywords_id(self):
         logger.info("ArticlesSecondaryInfoScraper._get_keywords_id")
@@ -161,39 +157,42 @@ class ArticlesSecondaryInfoScraper(Scraper):
                 session.commit()
             raise ex
 
+    def _error_recovery(self) -> None:
+        # todo
+        pass
+
     @staticmethod
     def entry_point(article_id: int = None):
         logger.info("ArticlesSecondaryInfoScraper.entry_point")
-        
-        parser = ArticlesSecondaryInfoScraper()
-        
+
+        scraper = ArticlesSecondaryInfoScraper()
+
         if article_id is None:
-            parser.get_one_message()
-            parser._article_id = parser._servicebus_source_message
-            if parser._servicebus_source_message is None: 
+            scraper.get_one_message()
+            scraper._article_id = scraper._servicebus_source_message
+            if scraper._servicebus_source_message is None:
                 logger.info("No messages to process in the queue.")
-                return 
+                return
 
         else:
-            parser._article_id = article_id
-            
-        if parser._article_id is not None:
-            logger.info(f"Processing: {parser._article_id}")
+            scraper._article_id = article_id
+
+        if scraper._article_id is not None:
+            logger.info(f"Processing: {scraper._article_id}")
             try:
-                parser._get_article_url()
-                parser._get_articles_info()
-                parser._add_new_keywords()
-                parser._get_keywords_id()
-                parser._add_articles()
-                parser.add_keywords()
-                parser._update_stage()
+                scraper._get_article_url()
+                scraper._get_articles_info()
+                scraper._add_new_keywords()
+                scraper._get_keywords_id()
+                scraper._add_articles()
+                scraper.add_keywords()
+                scraper._update_stage()
+                scraper.send_message(message_text=str(scraper._article_id))
+                scraper.complete_message()
             except Exception as e:
                 logger.error(f"Error: {e}")
-                parser.abandon_message()
-                parser.log_scraper_error(
-                    id=parser._article_id,
-                    error=e
-                )
+                scraper.abandon_message()
+                scraper.log_scraper_error(id=scraper._article_id, error=e)
 
 
 if __name__ == "__main__":

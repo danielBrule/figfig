@@ -77,7 +77,7 @@ class ArticlesPrimaryInfoScraper(Scraper):
 
     def _add_new_urls(self):
         logger.info("ArticlesPrimaryInfoScraper._add_new_urls")
-        with Session(get_engine()) as session:
+        with Session(get_engine(), expire_on_commit=False) as session:
             session.add_all(self._orl_articles)
             session.commit()
 
@@ -106,41 +106,52 @@ class ArticlesPrimaryInfoScraper(Scraper):
                 session.commit()
             raise ex
 
+    def _send_message_to_service_bus(self):
+        new_ids = [u.id for u in self._orl_articles]
+        for id in new_ids:
+            self.send_message(message_text=str(id))
+
+    def _error_recovery(self) -> None:
+        # todo
+        pass
+
     @staticmethod
     def entry_point(sitetmap_urls_id: int = None):
         logger.info("ArticlesPrimaryInfoScraper.entry_point")
 
-        parser = ArticlesPrimaryInfoScraper()
-        
-        if sitetmap_urls_id is None:
-            parser.get_one_message()
-            parser._sitemap_urls_id = parser._servicebus_source_message
-            if parser._servicebus_source_message is None: 
-                logger.info("No messages to process in the queue.")
-                return 
-        else:
-            parser._sitemap_urls_id = sitetmap_urls_id
+        scraper = ArticlesPrimaryInfoScraper()
 
-        if parser._sitemap_urls_id is not None:
-            logger.info(f"Processing: {parser._sitemap_urls_id}")
+        if sitetmap_urls_id is None:
+            scraper.get_one_message()
+            scraper._sitemap_urls_id = scraper._servicebus_source_message
+            if scraper._servicebus_source_message is None:
+                logger.info("No messages to process in the queue.")
+                return
+        else:
+            scraper._sitemap_urls_id = sitetmap_urls_id
+
+        if scraper._sitemap_urls_id is not None:
+            logger.info(f"Processing: {scraper._sitemap_urls_id}")
             try:
-                parser._get_sitemap_url()
-                parser._get_articles_url()
-                parser._remove_urls_already_in_db()
-                if len(parser._l_new_articles_urls) > 0:
-                    parser._add_new_urls()
-                    parser._update_sitemap_url()
+                scraper._get_sitemap_url()
+                scraper._get_articles_url()
+                scraper._remove_urls_already_in_db()
+                if len(scraper._l_new_articles_urls) > 0:
+                    scraper._add_new_urls()
+                    scraper._update_sitemap_url()
                 else:
                     logger.warning(
-                        f"ArticlesPrimaryInfoScraper._update_sitemap_url '{parser._url_articles_xml}' has no new articles"
+                        f"ArticlesPrimaryInfoScraper._update_sitemap_url '{scraper._url_articles_xml}' has no new articles"
                     )
-                parser.complete_message()
+                scraper._send_message_to_service_bus(
+                    message_text=str(scraper.article_id)
+                )
+                scraper.complete_message()
             except Exception as e:
                 logger.error(f"Error: {e}")
-                parser.abandon_message()
-                parser.log_scraper_error(
-                    id=parser._sitemap_urls_id,
-                    error=e
-                )
+                scraper.abandon_message()
+                scraper.log_scraper_error(id=scraper._sitemap_urls_id, error=e)
+
+
 if __name__ == "__main__":
     ArticlesPrimaryInfoScraper.entry_point(sitetmap_urls_id=12)

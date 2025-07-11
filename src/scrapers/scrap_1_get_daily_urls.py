@@ -82,13 +82,19 @@ class DailyURLsScraper(Scraper):
         if os.getenv("APP_ENV") == "dev":
             self._l_urls_sitemap_new = self._l_urls_sitemap_new[:10]
 
-        with Session(get_engine()) as session:
+        with Session(get_engine(), expire_on_commit=False) as session:
             session.add_all(self._l_urls_sitemap_new)
             session.commit()
 
         logger.info(
             f"\t{len(self._l_urls_sitemap_new)} new URLs inserted into the database."
         )
+    
+    def _send_message_to_service_bus(self):
+        new_ids = [u.id for u in self._l_urls_sitemap_new]
+        for id in new_ids:
+            self.send_message(message_text=str(id))
+        
 
     # def _update_urls(self):
     #     logger.info("DailyURLsScraper._update_urls")
@@ -97,24 +103,25 @@ class DailyURLsScraper(Scraper):
     #         session.commit()
 
     #     logger.info(f"{len(self._l_urls_sitemap_updated)} new URLs updated into the database.")
+    def _error_recovery(self) -> None:
+        # todo
+        pass
 
     @staticmethod
     def entry_point():
         parser = DailyURLsScraper(newspaper=NewspaperEnum.Lefigaro)
-        try: 
+        try:
 
             logger.info("DailyURLsScraper.entry_point")
             parser._get_daily_urls()
             parser._get_daily_urls_to_process()
             parser._add_new_urls()
+            parser._send_message_to_service_bus()
         except Exception as e:
             logger.error(f"Error: {e}")
-            parser.log_scraper_error(
-                id=None,
-                error=e
-            )
+            parser.log_scraper_error(id=None, error=e)
         # self._update_urls()
 
 
 if __name__ == "__main__":
-        DailyURLsScraper.entry_point()
+    DailyURLsScraper.entry_point()

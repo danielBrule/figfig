@@ -128,38 +128,40 @@ class CommentsScraper(Scraper):
 
             raise ex
 
+    def _error_recovery(self) -> None:
+        # todo
+        pass
+
     @staticmethod
-    def entry_point(article_id:int = None):
+    def entry_point(article_id: int = None):
         logger.info("ArticlesInfo.entry_point")
 
-        parser = CommentsScraper()
+        scraper = CommentsScraper()
         if article_id is None:
-            parser.get_one_message()
-            parser._article_id = parser._servicebus_source_message
-            if parser._servicebus_source_message is None: 
+            scraper.get_one_message()
+            scraper._article_id = scraper._servicebus_source_message
+            if scraper._servicebus_source_message is None:
                 logger.info("No messages to process in the queue.")
-                return 
+                return
 
         else:
-            parser._article_id = article_id
+            scraper._article_id = article_id
 
-        if parser._article_id is not None:
-            logger.info(f"Processing: {parser._article_id}")
+        if scraper._article_id is not None:
+            logger.info(f"Processing: {scraper._article_id}")
             try:
-                parser._get_article_uid()
-                parser._get_articles_comments()
-                parser._add_new_comments()
+                scraper._get_article_uid()
+                scraper._get_articles_comments()
+                scraper._add_new_comments()
 
-                parser._update_stage()
+                scraper._update_stage()
+                scraper.complete_message()
             except Exception as e:
                 logger.error(f"Error: {e}")
-                parser.abandon_message()
-                parser.log_scraper_error(
-                    id=parser._article_id,
-                    error=e
-                )
+                scraper.abandon_message()
+                scraper.log_scraper_error(id=scraper._article_id, error=e)
 
 
 if __name__ == "__main__":
-    
+
     CommentsScraper.entry_point(article_id=12)

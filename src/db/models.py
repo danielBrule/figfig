@@ -51,7 +51,7 @@ class Keywords(Base):
     __tablename__ = "keywords"
     __table_args__ = {"schema": "dbo"}
     id = Column(Integer, primary_key=True, autoincrement=True)
-    full_keyword = Column(String(200), nullable=False)
+    full_keyword = Column(String(200), unique=True, nullable=False)
     __table_args__ = (
         Index('keywords_full_keyword', 'full_keyword'),  
     )
