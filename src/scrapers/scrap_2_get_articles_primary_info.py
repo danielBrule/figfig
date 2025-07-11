@@ -143,9 +143,12 @@ class ArticlesPrimaryInfoScraper(Scraper):
                     logger.warning(
                         f"ArticlesPrimaryInfoScraper._update_sitemap_url '{scraper._url_articles_xml}' has no new articles"
                     )
-                scraper._send_message_to_service_bus(
-                    message_text=str(scraper.article_id)
-                )
+                if scraper._orl_articles:
+                    for ids in scraper._orl_articles:
+                        logger.info(f"Article URL: {ids.url}")                        
+                        scraper._send_message_to_service_bus(
+                            message_text=str(ids.id)  
+                        )
                 scraper.complete_message()
             except Exception as e:
                 logger.error(f"Error: {e}")
