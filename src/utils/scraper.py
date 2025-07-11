@@ -68,13 +68,14 @@ class Scraper(ABC):
         """
         Retrieves one message from the queue. Returns None if no message.
         """
-        if self._service_bus_queue_destination is None:
-            raise ValueError("Queue destination is not set.")
-        logger.info(f"Retrieving one message from queue: {self._service_bus_queue_destination}")
+        logger.info("get_one_message")
+        if self._service_bus_queue_source is None:
+            raise ValueError("Queue source is not set.")
+        logger.info(f"\t\tRetrieving one message from queue: {self._service_bus_queue_source}")
 
         with self._servicebus_client:
             receiver = self._servicebus_client.get_queue_receiver(
-                queue_name=self._service_bus_queue_destination, max_wait_time=5
+                queue_name=self._service_bus_queue_source, max_wait_time=5
             )
             with receiver:
                 logger.info("Receiving messages...")
@@ -87,9 +88,11 @@ class Scraper(ABC):
         """
         Marks a message as successfully processed (removes it from the queue).
         """
+        logger.info("complete_message")
+
         with self._servicebus_client:
             receiver = self._servicebus_client.get_queue_receiver(
-                queue_name=self._service_bus_queue_destination
+                queue_name=self._service_bus_queue_source
             )
             with receiver:
                 receiver.complete_message(self._servicebus_source_message)
@@ -98,9 +101,10 @@ class Scraper(ABC):
         """
         Abandons the message so it can be retried later.
         """
+        logger.info("abandon_message")
         with self._servicebus_client:
             receiver = self._servicebus_client.get_queue_receiver(
-                queue_name=self._service_bus_queue_destination
+                queue_name=self._service_bus_queue_source
             )
             with receiver:
                 receiver.abandon_message(self._servicebus_source_message)
