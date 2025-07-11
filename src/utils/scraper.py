@@ -78,11 +78,12 @@ class Scraper(ABC):
                 queue_name=self._service_bus_queue_source, max_wait_time=5
             )
             with receiver:
-                logger.info("Receiving messages...")
+                logger.info("\t\tReceiving messages...")
                 messages = receiver.receive_messages(max_message_count=1)
-                logger.info(f"Received {len(messages)} messages.")
-                if messages:
-                    self._servicebus_source_message = messages[0]
+                logger.info(f"\t\tReceived {len(messages)} messages.")
+                if len(messages):
+                    self._servicebus_source_message = str(messages[0])
+                    logger.info(f"\t\tMessage received: {self._servicebus_source_message}")
 
     def complete_message(self) -> None:
         """
@@ -111,7 +112,7 @@ class Scraper(ABC):
 
     def log_scraper_error(self, id, error):
         error_entry = Error(
-            scraper_stage=self._stage,
+            stage=self._stage,
             data_id=id,
             error_type=type(error).__name__,
             error_message=str(error),

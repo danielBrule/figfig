@@ -139,7 +139,7 @@ class CommentsScraper(Scraper):
         scraper = CommentsScraper()
         if article_id is None:
             scraper.get_one_message()
-            scraper._article_id = scraper._servicebus_source_message
+            scraper._article_id = int(scraper._servicebus_source_message)
             if scraper._servicebus_source_message is None:
                 logger.info("No messages to process in the queue.")
                 return
