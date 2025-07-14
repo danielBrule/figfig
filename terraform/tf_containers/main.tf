@@ -195,7 +195,7 @@ resource "azurerm_container_group" "scrap_comments" {
 
 
 resource "azurerm_container_group" "reset_db_sb" {
-  name                = "scrap-comments-${var.env}"
+  name                = "reset-db-sb-${var.env}"
   location            = var.location
   resource_group_name = var.resource_group_name
   os_type             = "Linux"
@@ -208,7 +208,7 @@ resource "azurerm_container_group" "reset_db_sb" {
     identity_ids = [azurerm_user_assigned_identity.aci_identity.id]
   }
   container {
-    name   = "scraper-comments"
+    name   = "reset-db-sb"
     image  = "${var.acr_login_server}/${var.image_name}:latest"
     cpu    = "1"
     memory = "1.5"
