@@ -12,7 +12,7 @@ def create_tables():
     Base.metadata.drop_all(bind=get_engine())
     logger.info("\tCreate tables")
     Base.metadata.create_all(bind=get_engine())
-    logger.info("\t✅ Tables created.")
+    logger.info("\tTables created.")
 
 
 def init_tables():
@@ -30,4 +30,4 @@ def init_tables():
     with Session(get_engine()) as session:
         session.add_all(l_data_stage)
         session.commit()
-    logger.info("\t✅ Tables Initialised.")
+    logger.info("\tTables Initialised.")

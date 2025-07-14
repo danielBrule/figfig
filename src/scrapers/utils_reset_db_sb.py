@@ -17,7 +17,7 @@ def clean_servicebus(queue_name: str):
     Args:
         queue_name (str): _description_
     """
-
+    logger.info(f"clean_servicebus: {queue_name}")
     with ServiceBusClient.from_connection_string(SB_CONNECTION_STRING) as client:
         receiver = client.get_queue_receiver(queue_name=queue_name)
 
@@ -27,11 +27,11 @@ def clean_servicebus(queue_name: str):
                     max_message_count=50, max_wait_time=5
                 )
                 if not messages:
-                    print(f"Queue {queue_name} is empty.")
+                    logger.info(f"\tQueue {queue_name} is empty.")
                     break
                 for msg in messages:
                     receiver.complete_message(msg)
-                    print(f"Deleted: {msg.message_id}")
+                    logger.info(f"\tDeleted: {msg.message_id}")
 
 
 logger.info("initialise data base")

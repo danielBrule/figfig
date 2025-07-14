@@ -158,62 +158,33 @@ az ad app credential reset --id $APP_ID --append --display-name "GitHub Actions 
 
 # 6. Env files 
 ## 6.1. Root
-### 6.1.2. .env.dev
+### 6.1.1. .env.dev
 ```cmd
 # App settings
 ENV=dev
 DEBUG=True
 PORT=8000
-
+DOCKER_IMAGE_NAME=figfigacr.azurecr.io/figfig-app:v1
+PYTHONPATH=.
+DB_PASSWORD=<XXX>
+AZURE_CLIENT_ID=<XXX>
+AZURE_TENANT_ID=<XXX>
+AZURE_CLIENT_SECRET=<XXX>
 
 DB_SERVER=figfig-sql-dev.database.windows.net
-DB_NAME=figfig-db-dev-dev
+DB_NAME=figfig-db-dev
 DB_USER=sqladmin
-DB_PASSWORD=Th1s1sAPassw0rd
 DB_DRIVER=ODBC Driver 17 for SQL Server
-
-# ACR / Image name
-DOCKER_IMAGE_NAME=figfigacr.azurecr.io/figfig-app:v1
-PYTHONPATH=.
-
 LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
 LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
+KEY_VAULT_NAME=figfig-kv-dev
+# https://portal.azure.com/#@bruledanielgmail.onmicrosoft.com/resource/subscriptions/051a6d90-968b-4010-896c-8bdb26a892d0/resourceGroups/FigFigRG-dev/providers/Microsoft.ServiceBus/namespaces/figfig-sb-v7nujo/saskey
+# on the portal, navigate to the Service Bus namespace, then Shared access policies, then RootManageSharedAccessKey.
+SERVICEBUS_CONNECTION_STRING=<XXX>
 
-KEY_VAULT_NAME=figfig-key-vault-dev
 
-AZURE_CLIENT_ID=<XXX>
-AZURE_TENANT_ID=<XXX>
-AZURE_CLIENT_SECRET=<XXX>
 ```
 
-### 6.1.2. .env.prod
-
-# App settings
-```cmd
-ENV=prod
-DEBUG=True
-PORT=8000
-
-
-DB_SERVER=figscraper-sql-prod.database.windows.net
-DB_NAME=figfig-db-dev-prod
-DB_USER=sqladmin
-DB_PASSWORD=Th1s1sAPassw0rd
-DB_DRIVER=ODBC Driver 17 for SQL Server
-
-# ACR / Image name
-DOCKER_IMAGE_NAME=figfigacr.azurecr.io/figfig-app:v1
-PYTHONPATH=.
-
-LOG_DATETIME_FORMAT= "%Y-%m-%d_%H"
-LOG_FORMAT="%(asctime)s - %(levelname)s - %(message)s"
-
-KEY_VAULT_NAME=figfig-key-vault-prod
-
-AZURE_CLIENT_ID=<XXX>
-AZURE_TENANT_ID=<XXX>
-AZURE_CLIENT_SECRET=<XXX>
-```
 
 ## 6.2. terraform
 ### 6.2.2. terraform/envs/dev/terraform.tfvars

@@ -91,9 +91,8 @@ class DailyURLsScraper(Scraper):
         )
 
     def _send_message_to_service_bus(self):
-        new_ids = [u.id for u in self._l_urls_sitemap_new]
-        for id in new_ids:
-            self.send_message(messages=[str(id)])
+        new_ids = [str(u.id) for u in self._l_urls_sitemap_new]
+        self.send_message(messages=new_ids)
 
     # def _update_urls(self):
     #     logger.info("DailyURLsScraper._update_urls")

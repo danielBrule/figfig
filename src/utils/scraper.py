@@ -67,7 +67,7 @@ class Scraper(ABC):
                 # Build a list of ServiceBusMessage objects
                 servicebus_messages = [ServiceBusMessage(msg, message_id=msg) for msg in messages]
                 sender.send_messages(servicebus_messages)  # ✅ batch send
-                logger.info(f"✅ Sent {len(messages)} messages.")
+                logger.info(f"\tSent {len(messages)} messages.")
 
     def get_one_message(self):
         """

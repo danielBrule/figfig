@@ -8,7 +8,10 @@
             "program": "${file}",
             "cwd": "${workspaceFolder}/src",  
             "console": "integratedTerminal",
-            "envFile": "${workspaceFolder}/.env.dev"
+            "envFile": "${workspaceFolder}/.env.dev",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
         },
         {
             "name": "Python Debugger: Current File",
@@ -17,7 +20,10 @@
             "program": "${file}",
             "cwd": "${workspaceFolder}/src",  
             "console": "integratedTerminal",
-              "envFile": "${workspaceFolder}/.env.dev"
+            "envFile": "${workspaceFolder}/.env.dev",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
         }
     ]
 }
