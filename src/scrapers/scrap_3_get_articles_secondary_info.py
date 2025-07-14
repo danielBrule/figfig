@@ -170,10 +170,12 @@ class ArticlesSecondaryInfoScraper(Scraper):
 
         if article_id is None:
             scraper.get_one_message()
-            scraper._article_id = int(str(scraper._servicebus_source_message))
+            scraper._article_id = scraper._servicebus_source_message
             if scraper._servicebus_source_message is None:
                 logger.info("No messages to process in the queue.")
                 return
+            else:
+                scraper._article_id = int(str(scraper._article_id))
 
         else:
             scraper._article_id = article_id

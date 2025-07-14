@@ -25,7 +25,3 @@ output "client_object_id" {
 output "github_oidc_object_id" {
   value = data.azuread_service_principal.github_oidc.object_id
 }
-
-output "reset_db_sb_container_group_name" {
-  value = module.containers.reset_db_sb_name
-}
