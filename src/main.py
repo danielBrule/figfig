@@ -11,5 +11,7 @@ elif SCRAPER == "scraper-articles-secondary-info":
     subprocess.run(["python", "scrapers/scrap_3_get_articles_secondary_info.py"])
 elif SCRAPER == "scraper-comments":
     subprocess.run(["python", "scrapers/scrap_4_get_comments.py"])
+elif SCRAPER == "reset-db-sb":
+    subprocess.run(["python", "scrapers/scrap_4_get_comments.py"])
 else:
     raise ValueError(f"Unknown SCRAPER type: {SCRAPER}")

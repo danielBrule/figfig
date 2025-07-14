@@ -13,6 +13,8 @@ resource "azurerm_servicebus_queue" "queue_article_primary_info" {
   max_delivery_count = 2 
   max_size_in_megabytes = 1024
   lock_duration   = "PT5M" 
+  requires_duplicate_detection = true
+  duplicate_detection_history_time_window = "P7D"
 }
 
 resource "azurerm_servicebus_queue" "queue_article_secondary_info" {
@@ -22,6 +24,8 @@ resource "azurerm_servicebus_queue" "queue_article_secondary_info" {
   max_delivery_count = 2
   max_size_in_megabytes = 1024
   lock_duration   = "PT5M"
+  requires_duplicate_detection = true
+  duplicate_detection_history_time_window = "P7D"
 }
 
 resource "azurerm_servicebus_queue" "queue_comments" {
@@ -31,6 +35,9 @@ resource "azurerm_servicebus_queue" "queue_comments" {
   max_delivery_count = 2
   max_size_in_megabytes = 1024
   lock_duration   = "PT5M"
+  
+  requires_duplicate_detection = true
+  duplicate_detection_history_time_window = "P7D"
 }
 
 resource "azurerm_servicebus_namespace_authorization_rule" "queue_auth_rule" {
